@@ -150,15 +150,17 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
 
       {/* Main Hero / Landscape Section - background starts immediately after navbar */}
       {/* Main Hero / Landscape Section - background dictates height using CSS Grid */}
-      <main className="relative z-10 flex-1 w-full grid bg-[#ebeae4]">
+      <main className="relative z-10 flex-1 w-full grid overflow-hidden bg-[#ebeae4]">
         {/* Background photo starting right after navbar */}
         <img
           src="/welcome_bg.jpg"
           alt="Saudi Regions Quiz"
           className="col-start-1 row-start-1 w-full h-auto object-cover pointer-events-none z-0"
           style={{
-            objectPosition: 'center top',
+            objectPosition: 'center 16%',
             minHeight: 'calc(100dvh - 80px)',
+            transform: 'scale(1.07) translateY(-2%)',
+            transformOrigin: 'center center',
           }}
         />
         {/* Subtle responsive vignette for contrast */}
