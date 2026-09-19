@@ -195,10 +195,11 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
             <div
               className="relative z-[2] w-full box-border rounded-[32px] border border-white/70 bg-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.28)] sm:rounded-[40px] sm:p-10 lg:p-11"
             >
-              {/* Headline — Saudi Bold; Figma ~34–36px with tight leading */}
+              {/* Headline — Figma: Saudi Bold 700, 68.88px, line-height 67%, tracking 0, #004C42 */}
               <h1
-                className="font-saudi mb-2 text-[26px] font-bold uppercase leading-[0.95] tracking-normal text-[#004C42] sm:text-[32px] lg:text-[36px]"
+                className="font-saudi mb-2 text-[36px] font-bold uppercase tracking-normal text-[#004C42] sm:text-[48px] lg:text-[68.88px]"
                 data-testid="text-welcome-title"
+                style={{ lineHeight: '67%' }}
               >
                 YOUR JOURNEY
                 <br />
