@@ -71,11 +71,10 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
       <div 
         className={`relative transition-all duration-700 ease-in-out ${
           isOpen
-            ? 'aspect-[1440/1024] [container-type:inline-size]'
+            ? 'w-full max-w-5xl aspect-[1440/1024]'
             : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'
         }`}
         style={{
-          ...(isOpen ? { width: 'min(100%, 64rem, calc((100dvh - 2rem) * 1440 / 1024))' } : {}),
           /* Realistic 3-D book drop shadow */
           filter: isOpen
             ? 'drop-shadow(0 40px 60px rgba(0,0,0,0.7)) drop-shadow(0 10px 20px rgba(0,0,0,0.5))'
@@ -190,7 +189,7 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
                     {isCompleted ? (
                       <img src="/stamp-new.png" alt={`${region.name} Stamp`} className="w-[85%] h-[85%] object-contain" />
                     ) : (
-                      <span className="font-display text-gray-400 text-[1.5cqw] opacity-50">?</span>
+                      <span className="font-display text-gray-400 text-[1.5vw] opacity-50">?</span>
                     )}
                   </div>
                 </div>
