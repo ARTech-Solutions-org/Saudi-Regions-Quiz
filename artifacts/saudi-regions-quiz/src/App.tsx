@@ -371,9 +371,8 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
     (n, _, i) => n + (existing[i] !== undefined && existing[i] !== null ? 1 : 0),
     0,
   );
-  // Current question within this region (Q1 → Q3); fill grows as each is answered
-  const currentQuestion = Math.min(Math.max(answeredCount + 1, 1), totalQuestions);
-  const questionProgress = (currentQuestion / totalQuestions) * 100;
+  // Starts empty; fills 1/3 → 2/3 → 3/3 as each question is answered
+  const questionProgress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
   const regionAnim = leaving ? 'region-out' : 'region-in';
 
   useEffect(() => {
@@ -432,7 +431,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           </h1>
         </div>
 
-        {/* Overlay 2: Per-question progress within the current region */}
+        {/* Overlay 2: Per-question progress — empty until answers, then Q1→Q3 */}
         <div 
           className="absolute overflow-hidden"
           style={{
@@ -449,10 +448,11 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
             style={{
               width: `${questionProgress}%`,
               borderRadius: '0.825vw',
-              minWidth: '3.5vw',
+              minWidth: answeredCount > 0 ? '3.5vw' : 0,
+              opacity: answeredCount > 0 ? 1 : 0,
             }}
           >
-            Q{currentQuestion}
+            {answeredCount > 0 ? `Q${answeredCount}` : null}
           </div>
         </div>
 
@@ -579,10 +579,15 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         <div className="px-4 pt-4">
           <div className="relative h-8 w-full overflow-hidden rounded-full bg-[rgba(0,76,66,0.3)]">
             <div
-              className="font-saudi absolute inset-y-0 left-0 flex min-w-[3.25rem] items-center justify-center rounded-full bg-[#004C42] px-3 text-[12px] font-bold text-white transition-all duration-500 ease-out"
-              style={{ width: `${questionProgress}%` }}
+              className="font-saudi absolute inset-y-0 left-0 flex items-center justify-center rounded-full bg-[#004C42] px-3 text-[12px] font-bold text-white transition-all duration-500 ease-out"
+              style={{
+                width: `${questionProgress}%`,
+                minWidth: answeredCount > 0 ? '3.25rem' : 0,
+                opacity: answeredCount > 0 ? 1 : 0,
+                paddingInline: answeredCount > 0 ? undefined : 0,
+              }}
             >
-              Q{currentQuestion}
+              {answeredCount > 0 ? `Q${answeredCount}` : null}
             </div>
           </div>
         </div>
@@ -688,11 +693,11 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
         </div>
 
         {/* Shared right edge ≈ 1212 (Figma number box 1025.77 + 186) */}
-        {/* GAME SCORE — y 336.5 · Saudi Regular 400 · 100px · LH 67% · right */}
+        {/* GAME SCORE label — keep higher; only values shift down */}
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
-            top: `${(336.5 / 1024) * 100}%`,
+            top: `${((336.5 - 67) / 1024) * 100}%`,
             right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '6.94vw',
             lineHeight: '67%',
@@ -704,11 +709,11 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           Game score
         </div>
 
-        {/* Score value — y 449 · Saudi Bold 700 · 200px · LH 67% · right */}
+        {/* Score value — nudged down to clear the panel divider */}
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
-            top: `${(449 / 1024) * 100}%`,
+            top: `${((449 + 55) / 1024) * 100}%`,
             right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '13.89vw',
             lineHeight: '67%',
@@ -720,11 +725,11 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           {animatedScore}
         </div>
 
-        {/* REGIONS COMPLETED — y 660.5 · Saudi Regular 400 · 100px · LH 67% · right */}
+        {/* REGIONS COMPLETED label — keep higher with Game score */}
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
-            top: `${(660.5 / 1024) * 100}%`,
+            top: `${((660.5 - 67) / 1024) * 100}%`,
             right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '6.94vw',
             lineHeight: '67%',
@@ -736,11 +741,11 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           Regions completed
         </div>
 
-        {/* Regions value — y 773 · Bold 200px + Regular 100px /13 · right */}
+        {/* Regions value — same downward nudge as game score */}
         <div
           className="font-saudi pointer-events-none absolute flex items-baseline justify-end whitespace-nowrap uppercase text-white"
           style={{
-            top: `${(773 / 1024) * 100}%`,
+            top: `${((773 + 55) / 1024) * 100}%`,
             right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '13.89vw',
             lineHeight: '67%',
