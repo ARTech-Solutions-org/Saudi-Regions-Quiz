@@ -431,25 +431,28 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           </h1>
         </div>
 
-        {/* Overlay 2: Per-question progress — empty until answers, then Q1→Q3 */}
+        {/* Overlay 2: Flat progress track + fill + Qn (no SVG art) */}
         <div 
           className="absolute overflow-hidden"
           style={{
-            top: '21.87%',
-            left: '42.01%',
-            width: '40.97%',
-            height: '4.10%',
-            borderRadius: '0.825vw',
-            background: 'rgba(0, 76, 66, 0.3)',
+            top: `${(224 / 1024) * 100}%`,
+            left: `${(605 / 1440) * 100}%`,
+            width: `${(630 / 1440) * 100}%`,
+            height: `${(43 / 1024) * 100}%`,
+            borderRadius: `${(21.5 / 1440) * 100}vw`,
+            backgroundColor: '#B8CDC8',
           }}
         >
           <div 
-            className="absolute inset-y-0 left-0 flex items-center justify-center bg-[#004C42] text-[1.65vw] font-bold text-white transition-all duration-500 ease-out"
+            className="font-saudi absolute inset-y-0 left-0 flex items-center justify-center text-white transition-all duration-500 ease-out"
             style={{
               width: `${questionProgress}%`,
-              borderRadius: '0.825vw',
               minWidth: answeredCount > 0 ? '3.5vw' : 0,
               opacity: answeredCount > 0 ? 1 : 0,
+              borderRadius: `${(21.5 / 1440) * 100}vw`,
+              backgroundColor: '#004C42',
+              fontSize: '1.65vw',
+              fontWeight: 700,
             }}
           >
             {answeredCount > 0 ? `Q${answeredCount}` : null}
@@ -577,14 +580,15 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         </div>
 
         <div className="px-4 pt-4">
-          <div className="relative h-8 w-full overflow-hidden rounded-full bg-[rgba(0,76,66,0.3)]">
+          <div className="relative h-8 w-full overflow-hidden rounded-full" style={{ backgroundColor: '#B8CDC8' }}>
             <div
-              className="font-saudi absolute inset-y-0 left-0 flex items-center justify-center rounded-full bg-[#004C42] px-3 text-[12px] font-bold text-white transition-all duration-500 ease-out"
+              className="font-saudi absolute inset-y-0 left-0 flex items-center justify-center rounded-full text-[12px] font-bold text-white transition-all duration-500 ease-out"
               style={{
                 width: `${questionProgress}%`,
                 minWidth: answeredCount > 0 ? '3.25rem' : 0,
                 opacity: answeredCount > 0 ? 1 : 0,
-                paddingInline: answeredCount > 0 ? undefined : 0,
+                paddingInline: answeredCount > 0 ? '0.75rem' : 0,
+                backgroundColor: '#004C42',
               }}
             >
               {answeredCount > 0 ? `Q${answeredCount}` : null}
