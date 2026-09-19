@@ -732,14 +732,12 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           {animatedScore}
         </div>
 
-        {/* REGIONS COMPLETED — Figma: x 639, y 602, 627×67, Saudi Regular 100, LH 67%, right */}
+        {/* REGIONS COMPLETED — Figma: x 639, y 602, 627×67, Saudi Regular 100, LH 67%, right, one line */}
         <div
-          className="font-saudi pointer-events-none absolute uppercase text-white"
+          className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
             top: `${(602 / 1024) * 100}%`,
-            left: `${(639 / 1440) * 100}%`,
-            width: `${(627 / 1440) * 100}%`,
-            height: `${(67 / 1024) * 100}%`,
+            right: `${((1440 - (639 + 627)) / 1440) * 100}%`,
             fontSize: '6.94vw',
             lineHeight: '67%',
             letterSpacing: 0,
