@@ -27,6 +27,28 @@ const blankJourney: SavedJourney = {
   player: null, completed: [], answers: {}, score: 0, currentRegion: null, currentQuestion: 0,
 };
 
+function useCountUp(target: number, duration = 900) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || target === 0) {
+      setValue(target);
+      return;
+    }
+    let start: number | null = null;
+    let raf = 0;
+    const step = (ts: number) => {
+      if (start === null) start = ts;
+      const p = Math.min(1, (ts - start) / duration);
+      setValue(Math.round(target * p));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return value;
+}
+
 function loadJourney(): SavedJourney {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -317,20 +339,36 @@ function ScreenHeader() {
 }
 
 function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport }: { region: Region; journey: SavedJourney; onComplete: (regionId: string) => void; onAnswer: (regionId: string, questionIndex: number, answer: number) => void; onFinish: () => void; onViewPassport: () => void }) {
-  const existing = journey.answers[region.id] ?? [];
-  const allAnswered = region.questions.every((_, idx) => existing[idx] !== undefined);
+  const [shownRegion, setShownRegion] = useState(region);
+  const [leaving, setLeaving] = useState(false);
+  const existing = journey.answers[shownRegion.id] ?? [];
+  const allAnswered = shownRegion.questions.every((_, idx) => existing[idx] !== undefined);
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, number[]>>({});
+  const [submitPulse, setSubmitPulse] = useState(false);
   const regionNumber = Math.min(journey.completed.length + 1, regions.length);
   const progress = (regionNumber / regions.length) * 100;
+  const regionAnim = leaving ? 'region-out' : 'region-in';
 
   useEffect(() => {
-    setWrongAttempts({});
-  }, [region.id]);
+    if (region.id === shownRegion.id) return;
+    setLeaving(true);
+    const t = window.setTimeout(() => {
+      setShownRegion(region);
+      setLeaving(false);
+      setWrongAttempts({});
+      setSubmitPulse(false);
+    }, 280);
+    return () => window.clearTimeout(t);
+  }, [region, shownRegion.id]);
+
+  useEffect(() => {
+    if (allAnswered) setSubmitPulse(true);
+  }, [allAnswered]);
 
   const pickOption = (qIndex: number, oIndex: number, answered: boolean, isWrong: boolean) => {
-    if (answered || isWrong) return;
-    if (oIndex === region.questions[qIndex].answer) {
-      onAnswer(region.id, qIndex, oIndex);
+    if (leaving || answered || isWrong) return;
+    if (oIndex === shownRegion.questions[qIndex].answer) {
+      onAnswer(shownRegion.id, qIndex, oIndex);
     } else {
       setWrongAttempts((prev) => ({
         ...prev,
@@ -340,10 +378,11 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
   };
 
   return (
-    <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
+    <div className="screen-in flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
 
       {/* Desktop Figma frame — readable from ~1024px up */}
       <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-white lg:block">
+        <div className="ken-burns absolute inset-0">
         
         {/* The SVG Background (No Text). Using it precisely as the layout! */}
         <img 
@@ -357,8 +396,8 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           className="absolute flex items-center justify-start pl-[5%]"
           style={{ top: '0%', left: '0%', width: '45%', height: '18%' }}
         >
-          <h1 className="text-white text-[4.5vw] xl:text-[75px] font-bold uppercase tracking-widest leading-none mt-[-2%]">
-            {region.name} REGION
+          <h1 key={shownRegion.id} className={`${regionAnim} text-white text-[4.5vw] xl:text-[75px] font-bold uppercase tracking-widest leading-none mt-[-2%]`}>
+            {shownRegion.name} REGION
           </h1>
         </div>
 
@@ -376,7 +415,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         </div>
 
         {/* Overlay 3: The 3 Questions */}
-        {region.questions.map((question, qIndex) => {
+        {shownRegion.questions.map((question, qIndex) => {
           // Exact top percentages from the SVG rects
           const topPer = [29.29, 46.14, 62.93][qIndex];
           const selected = existing[qIndex];
@@ -387,7 +426,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
             <div key={qIndex}>
               {/* Question Box (Transparent bg, SVG draws the white box) */}
               <div 
-                className="absolute flex items-center px-[3%]"
+                className={`absolute flex items-center px-[3%] ${regionAnim}`}
                 style={{ top: `${topPer}%`, left: '42.01%', width: '29.09%', height: '13.76%' }}
               >
                 <p className="text-[#004C42] font-bold text-[1.8vw] xl:text-[28px] leading-snug">{question.prompt}</p>
@@ -395,27 +434,27 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
               {/* Options Box Overlay */}
               <div 
-                className="absolute flex flex-col justify-between"
+                className={`absolute flex flex-col justify-between ${regionAnim}`}
                 style={{ top: `${topPer - 0.06}%`, left: '72.45%', width: '13.35%', height: '13.9%' }}
               >
                 {question.options.map((option, oIndex) => {
                   const isAnswer = answered && oIndex === question.answer;
                   const isWrong = wrongs.includes(oIndex);
 
-                  let btnClass = "bg-transparent border-none text-[#004C42] hover:bg-[#004C42]/5";
-                  if (isAnswer) btnClass = "bg-[#004C42] text-white shadow-sm";
-                  else if (isWrong) btnClass = "bg-[#ffe5e5] text-[#d9383a]"; // Opaque light red
+                  let btnClass = "bg-transparent border-none text-[#004C42] hover:bg-[#004C42]/10";
+                  if (isAnswer) btnClass = "bg-[#004C42] text-white shadow-sm answer-correct";
+                  else if (isWrong) btnClass = "bg-[#ffe5e5] text-[#d9383a] answer-wrong";
 
                   return (
                     <button
                       key={oIndex}
                       onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
-                      disabled={answered || isWrong}
-                      className={`w-full h-[46.5%] text-[1.2vw] xl:text-[20px] font-semibold transition-all ${btnClass} flex items-center justify-between px-[6%] focus:outline-none`}
+                      disabled={leaving || answered || isWrong}
+                      className={`w-full h-[46.5%] text-[1.2vw] xl:text-[20px] font-semibold transition-all duration-200 ${btnClass} flex items-center justify-between px-[6%] focus:outline-none`}
                       style={{ borderRadius: '0.6vw' }}
                     >
                       <span className="truncate pr-1">{option}</span>
-                      {isAnswer && <Check size={20} strokeWidth={4} className="text-white flex-shrink-0" />}
+                      {isAnswer && <Check size={20} strokeWidth={4} className="check-pop text-white flex-shrink-0" />}
                     </button>
                   );
                 })}
@@ -427,10 +466,10 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         {/* Overlay 4: Bottom Action Buttons */}
         {/* Submit Button Overlay */}
         <button 
-          onClick={() => allAnswered && onComplete(region.id)}
-          disabled={!allAnswered}
+          onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
+          disabled={!allAnswered || leaving}
           className={`absolute bg-transparent flex items-center justify-center font-bold text-[2.2vw] xl:text-[36px] transition-all focus:outline-none ${
-            allAnswered ? 'text-white hover:opacity-80' : 'text-white/50 cursor-not-allowed'
+            allAnswered ? `text-white hover:opacity-80 ${submitPulse ? 'submit-ready-text' : ''}` : 'text-white/50 cursor-not-allowed'
           }`}
           style={{ top: '82.81%', left: '42.01%', width: '29.44%', height: '7.03%' }}
         >
@@ -445,6 +484,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         >
           Finish my journey
         </button>
+        </div>
 
       </div>
 
@@ -453,7 +493,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         <img
           src="/frame2_no_text.svg"
           alt=""
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-left-top opacity-70"
+          className="mobile-quiz-art pointer-events-none absolute inset-0 h-full w-full object-cover object-left-top"
         />
         <div className="pointer-events-none absolute inset-0 bg-white/30" />
 
@@ -464,8 +504,8 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           <p className="text-[10px] font-bold uppercase tracking-[.2em] text-white/70">
             Region {regionNumber} of {regions.length}
           </p>
-          <h1 className="mt-1 text-2xl font-bold uppercase tracking-wide leading-tight">
-            {region.name} Region
+          <h1 key={shownRegion.id} className={`${regionAnim} mt-1 text-2xl font-bold uppercase tracking-wide leading-tight`}>
+            {shownRegion.name} Region
           </h1>
         </div>
 
@@ -481,15 +521,16 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         </div>
 
         <div className="flex flex-1 flex-col gap-4 px-4 py-5 pb-8">
-          {region.questions.map((question, qIndex) => {
+          {shownRegion.questions.map((question, qIndex) => {
             const selected = existing[qIndex];
             const answered = selected !== undefined && selected !== null;
             const wrongs = wrongAttempts[qIndex] || [];
 
             return (
               <section
-                key={qIndex}
-                className="rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
+                key={`${shownRegion.id}-${qIndex}`}
+                className={`${leaving ? 'q-card-out' : 'q-card-in'} rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)]`}
+                style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
               >
                 <p className="mb-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#668078]">
                   Question {qIndex + 1}
@@ -506,8 +547,8 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                       <button
                         key={oIndex}
                         onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
-                        disabled={answered || isWrong}
-                        className="flex min-h-12 w-full items-center justify-between rounded-full border px-4 py-3 text-left text-[15px] font-semibold leading-snug transition-all disabled:cursor-not-allowed"
+                        disabled={leaving || answered || isWrong}
+                        className={`flex min-h-12 w-full items-center justify-between rounded-full border px-4 py-3 text-left text-[15px] font-semibold leading-snug transition-all active:scale-[0.98] disabled:cursor-not-allowed ${isAnswer ? 'answer-correct' : ''} ${isWrong ? 'answer-wrong' : ''}`}
                         style={{
                           background: isAnswer ? '#004C42' : isWrong ? '#ffe5e5' : '#ffffff',
                           color: isAnswer ? '#fffaf0' : isWrong ? '#d9383a' : '#004C42',
@@ -515,7 +556,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                         }}
                       >
                         <span className="pr-2">{option}</span>
-                        {isAnswer && <Check size={18} strokeWidth={3} className="shrink-0" />}
+                        {isAnswer && <Check size={18} strokeWidth={3} className="check-pop shrink-0" />}
                       </button>
                     );
                   })}
@@ -525,9 +566,9 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           })}
 
           <button
-            onClick={() => allAnswered && onComplete(region.id)}
-            disabled={!allAnswered}
-            className="mt-2 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#004C42] text-base font-bold text-white shadow-[0_8px_20px_rgba(0,89,77,.16)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45"
+            onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
+            disabled={!allAnswered || leaving}
+            className={`mt-2 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#004C42] text-base font-bold text-white shadow-[0_8px_20px_rgba(0,89,77,.16)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 ${allAnswered && submitPulse ? 'submit-ready' : ''}`}
           >
             {journey.completed.length + 1 >= regions.length ? 'Finish Quiz' : 'Submit answers'}
           </button>
@@ -546,9 +587,11 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
 function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney; onRestart: () => void; onViewPassport: () => void }) {
   const completedRegions = regions.filter((region) => journey.completed.includes(region.id));
+  const animatedScore = useCountUp(journey.score);
+  const animatedRegions = useCountUp(completedRegions.length);
   
   return (
-    <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
+    <div className="screen-in flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
       <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
         <img 
           src="/frame4.svg" 
@@ -591,7 +634,7 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
             lineHeight: 0.67 
           }}
         >
-          {journey.score}
+          {animatedScore}
         </div>
 
         {/* REGIONS COMPLETED Title (Estimated above Regions) */}
@@ -615,7 +658,7 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           }}
         >
           <div className="flex items-baseline">
-            <span>{completedRegions.length}</span>
+            <span>{animatedRegions}</span>
             <span className="text-[7vw] opacity-80">/13</span>
           </div>
         </div>
@@ -648,12 +691,12 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           <div className="mt-8 space-y-4">
             <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
               <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Game score</p>
-              <p className="mt-2 font-display text-6xl font-bold leading-none">{journey.score}</p>
+              <p className="mt-2 font-display text-6xl font-bold leading-none">{animatedScore}</p>
             </div>
             <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
               <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Regions completed</p>
               <p className="mt-2 font-display text-6xl font-bold leading-none">
-                {completedRegions.length}
+                {animatedRegions}
                 <span className="text-3xl opacity-80">/{regions.length}</span>
               </p>
             </div>

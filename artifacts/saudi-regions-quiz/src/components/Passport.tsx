@@ -49,7 +49,7 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="overlay-in fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       {/* Close Button */}
       <button 
         onClick={onClose}
@@ -163,7 +163,7 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
             />
 
             {/* Badges / Stamps Overlay */}
-            {regions.map((region) => {
+            {regions.map((region, index) => {
               const coords = regionCoords[region.id];
               if (!coords) return null;
               
@@ -180,9 +180,12 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
                     width: '10%',
                   }}
                 >
-                  <div className={`relative w-full aspect-square rounded-full border-[3px] border-dashed flex items-center justify-center transition-all duration-500
-                    ${isCompleted ? 'border-[#DDB572] bg-[#DDB572]/20' : 'border-gray-300 bg-gray-50/50'}
-                  `}>
+                  <div
+                    className={`relative w-full aspect-square rounded-full border-[3px] border-dashed flex items-center justify-center transition-all duration-500 ${
+                      isCompleted ? 'border-[#DDB572] bg-[#DDB572]/20' : 'border-gray-300 bg-gray-50/50'
+                    } ${isCompleted ? 'stamp-pop' : ''}`}
+                    style={{ animationDelay: `${index * 55}ms` }}
+                  >
                     {isCompleted ? (
                       <img src="/stamp-new.png" alt={`${region.name} Stamp`} className="w-[85%] h-[85%] object-contain" />
                     ) : (
