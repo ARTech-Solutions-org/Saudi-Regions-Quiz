@@ -731,9 +731,21 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
       <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
         <div className="ken-burns absolute inset-0">
           <img
-            src="/frame3.svg"
-            alt="Region Completed Stamp"
+            src="/frame3_no_stamp.svg"
+            alt="Region Completed"
             className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+          />
+          <img
+            src="/completed-stamp.svg"
+            alt="Completed"
+            className="stamp-pop-seal pointer-events-none absolute"
+            style={{
+              top: '29.95%',
+              left: '6.33%',
+              width: '30.46%',
+              height: '43.77%',
+              animationDelay: '180ms',
+            }}
           />
           <button
             onClick={onContinue}
@@ -764,17 +776,12 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
           <div className="flex flex-1 flex-col items-center px-5 py-8 text-center text-white">
             <p className="q-card-in text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Your passport</p>
 
-            <div
-              className="stamp-pop mt-7 grid h-48 w-48 place-items-center rounded-full border-[5px] border-white bg-white/10 shadow-[0_16px_40px_rgba(0,0,0,.28)]"
+            <img
+              src="/completed-stamp.svg"
+              alt="Completed"
+              className="stamp-pop-seal mt-7 h-[13.5rem] w-[13.5rem] object-contain drop-shadow-[0_16px_40px_rgba(0,0,0,.28)]"
               style={{ animationDelay: '120ms' }}
-            >
-              <div className="grid h-[86%] w-[86%] place-items-center rounded-full border border-dashed border-white/85">
-                <div>
-                  <Check size={40} strokeWidth={3} className="check-pop mx-auto" style={{ animationDelay: '420ms' }} />
-                  <p className="mt-2 font-display text-lg font-bold tracking-[.16em]">COMPLETED</p>
-                </div>
-              </div>
-            </div>
+            />
 
             <h1 className="q-card-in mt-8 font-display text-3xl font-bold uppercase leading-tight tracking-wide" style={{ animationDelay: '280ms' }}>
               Congratulations!
