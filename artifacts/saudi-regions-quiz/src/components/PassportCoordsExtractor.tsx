@@ -27,7 +27,7 @@ export function PassportCoordsExtractor() {
         ids.forEach(id => {
           const el = doc.getElementById(id);
           if (el) {
-            const bbox = (el as SVGGraphicsElement).getBBox();
+            const bbox = (el as unknown as SVGGraphicsElement).getBBox();
             coords[id] = {
               left: (bbox.x / 1440) * 100,
               top: (bbox.y / 1024) * 100,

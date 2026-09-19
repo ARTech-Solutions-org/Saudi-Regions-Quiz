@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SavedJourney } from '../types';
+import type { SavedJourney } from '../App';
 import { regions } from '../data/regions';
 
 interface PassportProps {

@@ -14,7 +14,7 @@ import { saveJourney as apiSaveJourney, loadJourney as apiLoadJourney } from './
 const queryClient = new QueryClient();
 const STORAGE_KEY = 'saudi-passport-journey-v1';
 
-type SavedJourney = {
+export type SavedJourney = {
   player: { name: string; email: string } | null;
   completed: string[];
   answers: Record<string, number[]>;
