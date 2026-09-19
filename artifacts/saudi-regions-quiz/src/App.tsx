@@ -208,9 +208,8 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
 
               {/* Subheading — Figma: Saudi-MoD Medium 500, 17.23px, LH 140%, #767676 */}
               <p
-                className="font-mod mb-7 tracking-normal"
+                className="font-mod mb-7 tracking-normal text-[15px] sm:text-[17.23px]"
                 style={{
-                  fontSize: '17.23px',
                   fontWeight: 500,
                   lineHeight: '140%',
                   color: '#767676',
@@ -231,9 +230,8 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your full name"
                     data-testid="input-player-name"
                     aria-label="Enter your full name"
-                    className="font-mod box-border h-14 w-full rounded-full px-6 outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px]"
+                    className="font-mod box-border h-14 w-full rounded-full px-5 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px] sm:px-6 sm:text-[22px]"
                     style={{
-                      fontSize: '22px',
                       fontWeight: 300,
                       lineHeight: '140%',
                       color: '#000000',
@@ -262,9 +260,8 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your email address"
                     data-testid="input-player-email"
                     aria-label="Enter your email address"
-                    className="font-mod box-border h-14 w-full rounded-full px-6 outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px]"
+                    className="font-mod box-border h-14 w-full rounded-full px-5 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px] sm:px-6 sm:text-[22px]"
                     style={{
-                      fontSize: '22px',
                       fontWeight: 300,
                       lineHeight: '140%',
                       color: '#000000',
@@ -288,9 +285,8 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   <button
                     type="submit"
                     data-testid="button-start-journey"
-                    className="font-saudi flex h-[60px] w-full cursor-pointer items-center justify-center rounded-full text-center tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+                    className="font-saudi flex h-14 w-full cursor-pointer items-center justify-center rounded-full text-center text-[22px] tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 sm:h-[60px] sm:text-[28px] lg:text-[32.3px]"
                     style={{
-                      fontSize: '32.3px',
                       fontWeight: 400,
                       lineHeight: '140%',
                       backgroundColor: '#004C42',
@@ -568,10 +564,14 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         <ScreenHeader />
 
         <div className="bg-[#004C42] px-4 py-4 text-white">
-          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-white/70">
+          <p className="font-mod text-[11px] font-medium uppercase tracking-[.18em] text-white/70">
             Region {regionNumber} of {regions.length}
           </p>
-          <h1 key={shownRegion.id} className={`${regionAnim} mt-1 text-2xl font-bold uppercase tracking-wide leading-tight`}>
+          <h1
+            key={shownRegion.id}
+            className={`${regionAnim} font-saudi mt-1 text-[28px] font-bold uppercase tracking-normal sm:text-[32px]`}
+            style={{ lineHeight: 1.05 }}
+          >
             {shownRegion.name} Region
           </h1>
         </div>
@@ -579,7 +579,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         <div className="px-4 pt-4">
           <div className="relative h-8 w-full overflow-hidden rounded-full bg-[rgba(0,76,66,0.3)]">
             <div
-              className="absolute inset-y-0 left-0 flex min-w-[3.25rem] items-center justify-center rounded-full bg-[#004C42] px-3 text-[11px] font-bold text-white transition-all duration-500 ease-out"
+              className="font-saudi absolute inset-y-0 left-0 flex min-w-[3.25rem] items-center justify-center rounded-full bg-[#004C42] px-3 text-[12px] font-bold text-white transition-all duration-500 ease-out"
               style={{ width: `${questionProgress}%` }}
             >
               Q{currentQuestion}
@@ -599,10 +599,13 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                 className={`${leaving ? 'q-card-out' : 'q-card-in'} rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)]`}
                 style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
               >
-                <p className="mb-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#668078]">
+                <p className="font-mod mb-2 text-[11px] font-medium uppercase tracking-[.14em] text-[#668078]">
                   Question {qIndex + 1}
                 </p>
-                <p className="mb-4 text-base font-bold leading-snug text-[#004C42]">
+                <p
+                  className="font-saudi mb-4 tracking-normal text-[#004C42]"
+                  style={{ fontSize: '18px', fontWeight: 700, lineHeight: '22px', letterSpacing: 0 }}
+                >
                   {question.prompt}
                 </p>
                 <div className="flex flex-col gap-2.5">
@@ -615,15 +618,19 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                         key={oIndex}
                         onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
                         disabled={leaving || answered || isWrong}
-                        className={`flex min-h-12 w-full items-center justify-between rounded-full border px-4 py-3 text-left text-[15px] font-semibold leading-snug transition-all active:scale-[0.98] disabled:cursor-not-allowed ${isAnswer ? 'answer-correct' : ''} ${isWrong ? 'answer-wrong' : ''}`}
+                        className={`font-mod flex min-h-12 w-full items-center justify-center rounded-[12px] border px-4 py-3 text-center transition-all active:scale-[0.98] disabled:cursor-not-allowed ${isAnswer ? 'answer-correct' : ''} ${isWrong ? 'answer-wrong' : ''}`}
                         style={{
+                          fontSize: '16px',
+                          fontWeight: 600,
+                          lineHeight: '19px',
+                          letterSpacing: 0,
                           background: isAnswer ? '#004C42' : isWrong ? '#ffe5e5' : '#ffffff',
-                          color: isAnswer ? '#fffaf0' : isWrong ? '#d9383a' : '#004C42',
+                          color: isAnswer ? '#ffffff' : isWrong ? '#d9383a' : 'rgba(45, 45, 45, 0.5)',
                           borderColor: isAnswer ? '#004C42' : isWrong ? '#f3b4b4' : '#c8d0cc',
                         }}
                       >
                         <span className="pr-2">{option}</span>
-                        {isAnswer && <Check size={18} strokeWidth={3} className="check-pop shrink-0" />}
+                        {isAnswer && <Check size={18} strokeWidth={3} className="check-pop shrink-0 text-white" />}
                       </button>
                     );
                   })}
@@ -635,13 +642,13 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           <button
             onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
             disabled={!allAnswered || leaving}
-            className={`mt-2 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#004C42] text-base font-bold text-white shadow-[0_8px_20px_rgba(0,89,77,.16)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 ${allAnswered && submitPulse ? 'submit-ready' : ''}`}
+            className={`font-saudi mt-2 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#004C42] text-[18px] font-normal text-white shadow-[0_8px_20px_rgba(0,89,77,.16)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 ${allAnswered && submitPulse ? 'submit-ready' : ''}`}
           >
             {journey.completed.length + 1 >= regions.length ? 'Finish Quiz' : 'Submit answers'}
           </button>
           <button
             onClick={onFinish}
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#004C42]/40 bg-white/85 text-sm font-bold text-[#004C42]"
+            className="font-saudi inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#004C42]/40 bg-white/85 text-[16px] font-normal text-[#004C42]"
           >
             Finish my journey
           </button>
@@ -765,22 +772,45 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
         <div className="absolute inset-0 bg-gradient-to-b from-[#004C42]/70 via-[#004C42]/80 to-[#00352e]" />
 
         <div className="relative z-10 flex flex-1 flex-col px-5 py-8 text-white">
-          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Saudi National Day edition</p>
-          <h1 className="font-saudi mt-2 text-3xl font-bold uppercase leading-tight tracking-normal">
+          <p className="font-mod text-[11px] font-medium uppercase tracking-[.18em] text-white/70">Saudi National Day edition</p>
+          <h1
+            className="font-saudi mt-2 uppercase tracking-normal"
+            style={{ fontSize: '36px', fontWeight: 700, lineHeight: '67%' }}
+          >
             Congratulations!
           </h1>
-          <p className="mt-2 text-sm text-white/80">Your passport journey across Saudi Arabia.</p>
+          <p className="font-mod mt-3 text-[15px] font-medium text-white/80" style={{ lineHeight: '140%' }}>
+            Your passport journey across Saudi Arabia.
+          </p>
 
           <div className="mt-8 space-y-4">
-            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
-              <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Game score</p>
-              <p className="font-saudi mt-2 text-6xl font-bold leading-none">{animatedScore}</p>
+            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-right backdrop-blur-sm">
+              <p
+                className="font-saudi uppercase text-white"
+                style={{ fontSize: '22px', fontWeight: 400, lineHeight: '67%' }}
+              >
+                Game score
+              </p>
+              <p
+                className="font-saudi mt-2 uppercase text-white"
+                style={{ fontSize: '56px', fontWeight: 700, lineHeight: '67%' }}
+              >
+                {animatedScore}
+              </p>
             </div>
-            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
-              <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Regions completed</p>
-              <p className="font-saudi mt-2 text-6xl font-bold leading-none">
-                {animatedRegions}
-                <span className="text-3xl opacity-80">/{regions.length}</span>
+            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-right backdrop-blur-sm">
+              <p
+                className="font-saudi uppercase text-white"
+                style={{ fontSize: '22px', fontWeight: 400, lineHeight: '67%' }}
+              >
+                Regions completed
+              </p>
+              <p
+                className="font-saudi mt-2 flex items-baseline justify-end uppercase text-white"
+                style={{ fontSize: '56px', fontWeight: 700, lineHeight: '67%' }}
+              >
+                <span>{animatedRegions}</span>
+                <span style={{ fontSize: '28px', fontWeight: 400, lineHeight: '67%' }}>/{regions.length}</span>
               </p>
             </div>
           </div>
@@ -788,7 +818,7 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           <button
             onClick={onViewPassport}
             data-testid="button-view-passport-mobile"
-            className="mt-auto inline-flex min-h-14 w-full items-center justify-center rounded-full bg-white text-base font-bold text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)]"
+            className="font-saudi mt-auto inline-flex min-h-14 w-full items-center justify-center rounded-full bg-white text-[18px] font-normal text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)]"
           >
             View My Passport
           </button>
@@ -892,7 +922,7 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
           <ScreenHeader />
 
           <div className="flex flex-1 flex-col items-center px-5 py-8 text-center text-white">
-            <p className="q-card-in text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Your passport</p>
+            <p className="q-card-in font-mod text-[11px] font-medium uppercase tracking-[.18em] text-white/70">Your passport</p>
 
             <img
               src="/completed-stamp.svg"
@@ -901,16 +931,29 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
               style={{ animationDelay: '120ms' }}
             />
 
-            <h1 className="q-card-in mt-8 text-3xl font-bold uppercase leading-tight tracking-tight" style={{ animationDelay: '280ms', fontFamily: 'Saudi, sans-serif' }}>
+            <h1
+              className="q-card-in font-saudi mt-8 uppercase tracking-normal"
+              style={{ animationDelay: '280ms', fontSize: '36px', fontWeight: 700, lineHeight: '67%' }}
+            >
               Congratulations!
             </h1>
-            <p className="q-card-in mt-2 text-sm text-white/85" style={{ animationDelay: '360ms' }}>You have completed this region.</p>
-            <p className="q-card-in mt-1 text-xs text-white/70" style={{ animationDelay: '420ms' }}>You get a new stamp in your digital passport.</p>
+            <p
+              className="q-card-in font-mod mt-3 text-[15px] font-medium text-white/85"
+              style={{ animationDelay: '360ms', lineHeight: '140%' }}
+            >
+              You have completed this region.
+            </p>
+            <p
+              className="q-card-in font-mod mt-1 text-[13px] font-medium text-white/70"
+              style={{ animationDelay: '420ms', lineHeight: '140%' }}
+            >
+              You get a new stamp in your digital passport.
+            </p>
 
             <div className="q-card-in mt-8 w-full" style={{ animationDelay: '520ms' }}>
               <button
                 onClick={onContinue}
-                className="submit-ready inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-white text-base font-bold text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                className="font-saudi submit-ready inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-white text-[18px] font-normal text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
                 style={{ animationDelay: '900ms' }}
               >
                 <span>{allDone ? 'View my summary' : 'Continue to the next destination'}</span>
@@ -919,7 +962,7 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
             </div>
             <button
               onClick={onFinish}
-              className="q-card-in mt-4 inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4"
+              className="q-card-in font-saudi mt-4 inline-flex items-center gap-2 text-[16px] font-normal text-white underline underline-offset-4"
               style={{ animationDelay: '600ms' }}
             >
               Finish my journey
