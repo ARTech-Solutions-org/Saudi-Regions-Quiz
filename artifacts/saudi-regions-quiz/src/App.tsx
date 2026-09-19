@@ -713,11 +713,11 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           Game score
         </div>
 
-        {/* Score value — nudged down to clear the panel divider */}
+        {/* Score value — slightly below label, clear of Regions completed */}
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
-            top: `${((449 + 55) / 1024) * 100}%`,
+            top: `${((449 + 10) / 1024) * 100}%`,
             right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '13.89vw',
             lineHeight: '67%',
