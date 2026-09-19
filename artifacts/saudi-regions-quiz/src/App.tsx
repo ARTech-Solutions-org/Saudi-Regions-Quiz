@@ -206,14 +206,22 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                 STARTS HERE
               </h1>
 
-              {/* Subheading */}
-              <p className="font-saudi mb-7 text-[14px] font-normal leading-snug text-[#5C5C5C] sm:text-[16px] lg:text-[17px]">
+              {/* Subheading — Figma: Saudi-MoD Medium 500, 17.23px, LH 140%, #767676 */}
+              <p
+                className="font-mod mb-7 tracking-normal"
+                style={{
+                  fontSize: '17.23px',
+                  fontWeight: 500,
+                  lineHeight: '140%',
+                  color: '#767676',
+                }}
+              >
                 One passport. A journey across Saudi Arabia.
               </p>
 
               {/* Interactive Form */}
               <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4" noValidate>
-                {/* Full Name Input */}
+                {/* Full Name Input — Figma: Saudi-MoD 300, 22px, LH 140%, #000000 */}
                 <div>
                   <input
                     id="welcome-name"
@@ -223,8 +231,13 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your full name"
                     data-testid="input-player-name"
                     aria-label="Enter your full name"
-                    className="font-saudi box-border h-12 w-full rounded-full px-6 text-[15px] text-gray-900 outline-none transition-all duration-200 placeholder:text-[#A1A1A1] sm:h-14 sm:text-[17px]"
+                    className="font-mod box-border h-14 w-full rounded-full px-6 outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px]"
                     style={{
+                      fontSize: '22px',
+                      fontWeight: 300,
+                      lineHeight: '140%',
+                      color: '#000000',
+                      letterSpacing: 0,
                       border: touched && name.trim().length <= 1 ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
                       backgroundColor: '#ffffff',
                     }}
@@ -239,7 +252,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
-                {/* Email Address Input */}
+                {/* Email Input — same Figma type as name field */}
                 <div>
                   <input
                     id="welcome-email"
@@ -249,8 +262,13 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your email address"
                     data-testid="input-player-email"
                     aria-label="Enter your email address"
-                    className="font-saudi box-border h-12 w-full rounded-full px-6 text-[15px] text-gray-900 outline-none transition-all duration-200 placeholder:text-[#A1A1A1] sm:h-14 sm:text-[17px]"
+                    className="font-mod box-border h-14 w-full rounded-full px-6 outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px]"
                     style={{
+                      fontSize: '22px',
+                      fontWeight: 300,
+                      lineHeight: '140%',
+                      color: '#000000',
+                      letterSpacing: 0,
                       border: touched && !email.includes('@') ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
                       backgroundColor: '#ffffff',
                     }}
@@ -265,13 +283,16 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
-                {/* Submit Button — Figma text node ~167×45 → ~32px Regular */}
+                {/* Submit — Figma: Saudi Regular 400, 32.3px, LH 140%, #FFFFFF, center */}
                 <div className="pt-1">
                   <button
                     type="submit"
                     data-testid="button-start-journey"
-                    className="font-saudi flex h-12 w-full cursor-pointer items-center justify-center rounded-full text-[17px] font-normal tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 sm:h-[56px] sm:text-[20px] lg:h-[60px] lg:text-[24px]"
+                    className="font-saudi flex h-[60px] w-full cursor-pointer items-center justify-center rounded-full text-center tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
                     style={{
+                      fontSize: '32.3px',
+                      fontWeight: 400,
+                      lineHeight: '140%',
                       backgroundColor: '#004C42',
                     }}
                     onMouseEnter={(e) => {
@@ -394,12 +415,16 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           className="absolute inset-0 w-full h-full object-contain pointer-events-none" 
         />
         
-        {/* Overlay 1: Top Banner (Text Only) */}
+        {/* Overlay 1: Region title — Figma: Saudi Bold 700, 100px, LH 55px, #FFFFFF, uppercase */}
         <div 
           className="absolute"
           style={{ top: `${((114.5 - 100) / 1024) * 100}%`, left: `${(77 / 1440) * 100}%` }}
         >
-          <h1 key={shownRegion.id} className={`${regionAnim} font-saudi text-[6.94vw] font-bold uppercase leading-none tracking-normal text-white`}>
+          <h1
+            key={shownRegion.id}
+            className={`${regionAnim} font-saudi uppercase tracking-normal text-white`}
+            style={{ fontSize: '6.94vw', fontWeight: 700, lineHeight: '3.82vw', letterSpacing: 0 }}
+          >
             {shownRegion.name} REGION
           </h1>
         </div>
@@ -427,7 +452,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
           return (
             <div key={qIndex}>
-              {/* Question Box (Transparent bg, SVG draws the white box) */}
+              {/* Question — Figma: Saudi Bold 700, 35px, LH 30px, #004C42 */}
               <div 
                 className="absolute flex items-center overflow-hidden pl-[7.3%] pr-[4%]"
                 style={{ top: `${topPer}%`, left: '42.01%', width: '29.09%', height: '13.76%' }}
@@ -436,11 +461,16 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                   className={`${leaving ? 'q-card-out' : 'q-card-in'} flex h-full w-full items-center`}
                   style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
                 >
-                  <p className="font-saudi text-[2.43vw] font-bold leading-[0.86] tracking-normal text-[#004C42]">{question.prompt}</p>
+                  <p
+                    className="font-saudi tracking-normal text-[#004C42]"
+                    style={{ fontSize: '2.43vw', fontWeight: 700, lineHeight: '2.08vw', letterSpacing: 0 }}
+                  >
+                    {question.prompt}
+                  </p>
                 </div>
               </div>
 
-              {/* Options Box Overlay */}
+              {/* Answers — Figma: Saudi-MoD SemiBold 600, 20px, LH 23.73px, center, #2D2D2D @ 50% */}
               <div 
                 className="absolute overflow-hidden"
                 style={{ top: `${topPer - 0.06}%`, left: '72.45%', width: '13.35%', height: '13.9%' }}
@@ -462,8 +492,14 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                       key={oIndex}
                       onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
                       disabled={leaving || answered || isWrong}
-                      className={`font-mod relative flex h-[46.5%] w-full items-center justify-center px-[8%] text-center text-[1.39vw] leading-[1.18] tracking-normal transition-all duration-200 ${btnClass} focus:outline-none`}
-                      style={{ borderRadius: '0.6vw' }}
+                      className={`font-mod relative flex h-[46.5%] w-full items-center justify-center px-[8%] text-center tracking-normal transition-all duration-200 ${btnClass} focus:outline-none`}
+                      style={{
+                        borderRadius: '0.6vw',
+                        fontSize: '1.39vw',
+                        fontWeight: 600,
+                        lineHeight: '1.65vw',
+                        letterSpacing: 0,
+                      }}
                     >
                       <span className="max-w-full whitespace-pre-line">{option}</span>
                       {isAnswer && <Check size={16} strokeWidth={4} className="check-pop pointer-events-none absolute right-[6%] text-white" />}
@@ -626,64 +662,69 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           CONGRATULATIONS!
         </div>
 
-        {/* GAME SCORE — Figma: Saudi Regular 100px, x 888.56 y 336.5 */}
+        {/* GAME SCORE — Figma: Saudi Regular 400 · 100px · LH 67% · right · uppercase · #FFF */}
         <div
-          className="font-saudi pointer-events-none absolute whitespace-nowrap text-white"
+          className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
             top: `${((336.5 - 100) / 1024) * 100}%`,
             left: `${(888.559 / 1440) * 100}%`,
             fontSize: '6.94vw',
-            lineHeight: 1,
+            lineHeight: '67%',
             letterSpacing: 0,
             fontWeight: 400,
+            textAlign: 'right',
           }}
         >
-          GAME SCORE
+          Game score
         </div>
 
-        {/* Dynamic Game Score — Figma: Saudi Bold 200px, x 1025.77 y 449 */}
+        {/* Dynamic Game Score — Figma: Saudi Bold 700 · 200px · LH 67% · right · #FFF */}
         <div
-          className="font-saudi pointer-events-none absolute whitespace-nowrap font-bold text-white"
+          className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
             top: `${((449 - 200) / 1024) * 100}%`,
             left: `${(1025.77 / 1440) * 100}%`,
             fontSize: '13.89vw',
-            lineHeight: 1,
+            lineHeight: '67%',
             letterSpacing: 0,
+            fontWeight: 700,
+            textAlign: 'right',
           }}
         >
           {animatedScore}
         </div>
 
-        {/* REGIONS COMPLETED — Figma: Saudi Regular 100px, x 639.83 y 660.5 */}
+        {/* REGIONS COMPLETED — Figma: Saudi Regular 400 · 100px · LH 67% · right · uppercase · #FFF */}
         <div
-          className="font-saudi pointer-events-none absolute whitespace-nowrap text-white"
+          className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
             top: `${((660.5 - 100) / 1024) * 100}%`,
             left: `${(639.828 / 1440) * 100}%`,
             fontSize: '6.94vw',
-            lineHeight: 1,
+            lineHeight: '67%',
             letterSpacing: 0,
             fontWeight: 400,
+            textAlign: 'right',
           }}
         >
-          REGIONS COMPLETED
+          Regions completed
         </div>
 
-        {/* Dynamic Regions Completed — Figma number Bold 200px, /13 Regular 100px */}
+        {/* Dynamic Regions — Figma: number Saudi Bold 700 · 200px; /13 Saudi Regular 400 · 100px · LH 67% · right */}
         <div
-          className="font-saudi pointer-events-none absolute flex items-baseline whitespace-nowrap text-white"
+          className="font-saudi pointer-events-none absolute flex items-baseline whitespace-nowrap uppercase text-white"
           style={{
             top: `${((773 - 200) / 1024) * 100}%`,
             left: `${(1025.77 / 1440) * 100}%`,
             fontSize: '13.89vw',
-            lineHeight: 1,
+            lineHeight: '67%',
             letterSpacing: 0,
             fontWeight: 700,
+            textAlign: 'right',
           }}
         >
           <span>{animatedRegions}</span>
-          <span style={{ fontSize: '6.94vw', fontWeight: 400 }}>/{regions.length}</span>
+          <span style={{ fontSize: '6.94vw', fontWeight: 400, lineHeight: '67%' }}>/{regions.length}</span>
         </div>
 
 
