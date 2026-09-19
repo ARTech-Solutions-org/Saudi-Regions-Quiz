@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Compass, LockKeyhole, Map, RotateCcw, Sparkles, Trophy } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -47,6 +47,84 @@ function useCountUp(target: number, duration = 900) {
     return () => cancelAnimationFrame(raf);
   }, [target, duration]);
   return value;
+}
+
+/** Shrinks text to fit its parent; keeps Figma size when content is short. */
+function AutoFitText({
+  text,
+  maxSize,
+  minSize,
+  lineHeight,
+  className,
+}: {
+  text: string;
+  maxSize: string;
+  minSize: string;
+  lineHeight?: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+
+    const parseSize = (value: string) => {
+      const num = parseFloat(value);
+      if (value.endsWith('vw')) return (num / 100) * window.innerWidth;
+      if (value.endsWith('vh')) return (num / 100) * window.innerHeight;
+      return num;
+    };
+
+    const fit = () => {
+      const maxPx = parseSize(maxSize);
+      const minPx = parseSize(minSize);
+      let size = maxPx;
+      el.style.fontSize = `${size}px`;
+      if (lineHeight) el.style.lineHeight = lineHeight;
+
+      // Allow wrapping; shrink until both axes fit (with a small tolerance)
+      let guard = 40;
+      while (
+        guard-- > 0 &&
+        size > minPx &&
+        (el.scrollWidth > parent.clientWidth + 1 || el.scrollHeight > parent.clientHeight + 1)
+      ) {
+        size = Math.max(minPx, size - 0.5);
+        el.style.fontSize = `${size}px`;
+      }
+    };
+
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(parent);
+    window.addEventListener('resize', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+    };
+  }, [text, maxSize, minSize, lineHeight]);
+
+  return (
+    <span
+      ref={ref}
+      className={className}
+      style={{
+        display: 'block',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        overflow: 'hidden',
+        fontSize: maxSize,
+        lineHeight: lineHeight ?? 1.2,
+        textAlign: 'center',
+        overflowWrap: 'anywhere',
+        wordBreak: 'break-word',
+      }}
+    >
+      {text}
+    </span>
+  );
 }
 
 function loadJourney(): SavedJourney {
@@ -512,13 +590,18 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                       className={`font-mod relative flex h-[46.5%] w-full items-center justify-center px-[8%] text-center tracking-normal transition-all duration-200 ${btnClass} focus:outline-none`}
                       style={{
                         borderRadius: '0.6vw',
-                        fontSize: '1.39vw',
                         fontWeight: 600,
-                        lineHeight: '1.65vw',
                         letterSpacing: 0,
                       }}
                     >
-                      <span className="max-w-full whitespace-pre-line">{option}</span>
+                      <span className="flex h-full w-full items-center justify-center overflow-hidden py-[4%]">
+                        <AutoFitText
+                          text={option}
+                          maxSize="1.39vw"
+                          minSize="0.75vw"
+                          lineHeight="1.15"
+                        />
+                      </span>
                       {isAnswer && <Check size={16} strokeWidth={4} className="check-pop pointer-events-none absolute right-[6%] text-white" />}
                     </button>
                   );
@@ -629,16 +712,16 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                         disabled={leaving || answered || isWrong}
                         className={`font-mod flex min-h-12 w-full items-center justify-center rounded-[12px] border px-4 py-3 text-center transition-all active:scale-[0.98] disabled:cursor-not-allowed ${isAnswer ? 'answer-correct' : ''} ${isWrong ? 'answer-wrong' : ''}`}
                         style={{
-                          fontSize: '16px',
                           fontWeight: 600,
-                          lineHeight: '19px',
                           letterSpacing: 0,
                           background: isAnswer ? '#004C42' : isWrong ? '#ffe5e5' : '#ffffff',
                           color: isAnswer ? '#ffffff' : isWrong ? '#d9383a' : 'rgba(45, 45, 45, 0.5)',
                           borderColor: isAnswer ? '#004C42' : isWrong ? '#f3b4b4' : '#c8d0cc',
                         }}
                       >
-                        <span className="pr-2">{option}</span>
+                        <span className="min-w-0 flex-1 overflow-hidden pr-2">
+                          <AutoFitText text={option} maxSize="16px" minSize="11px" lineHeight="1.2" />
+                        </span>
                         {isAnswer && <Check size={18} strokeWidth={3} className="check-pop shrink-0 text-white" />}
                       </button>
                     );
