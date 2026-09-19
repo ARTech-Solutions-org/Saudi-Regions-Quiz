@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Saudi Regions Quiz"
+description = "A passport-style Saudi Arabia quiz journey with 13 region challenges, two-choice questions, stamps, score tracking, and a celebratory completion experience."
+version = "1.0.0"
+id = "artifacts/saudi-regions-quiz"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24559
+
+[services.development]
+run = "pnpm --filter @workspace/saudi-regions-quiz run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/saudi-regions-quiz", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/saudi-regions-quiz/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24559"
+BASE_PATH = "/"
