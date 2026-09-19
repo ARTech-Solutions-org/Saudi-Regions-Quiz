@@ -747,56 +747,63 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
               animationDelay: '180ms',
             }}
           />
-          <div
-            className="absolute flex flex-col justify-center text-white"
-            style={{ top: '33.8%', left: '38.82%', width: '52%', height: '14%' }}
-          >
-            <h1
-              className="q-card-in font-bold uppercase leading-none tracking-wide"
-              style={{ fontSize: '3.4vw', animationDelay: '280ms' }}
+          <img
+            src="/stamp-congrats.svg"
+            alt=""
+            className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+            style={{ animationDelay: '280ms' }}
+          />
+          <img
+            src="/stamp-body.svg"
+            alt=""
+            className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+            style={{ animationDelay: '360ms' }}
+          />
+          {allDone ? (
+            <button
+              onClick={onContinue}
+              className="q-card-in absolute flex items-center justify-center gap-[0.8vw] bg-white font-bold text-[#004C42] transition-opacity hover:opacity-90"
+              style={{
+                top: '50%',
+                left: '38.82%',
+                width: '39.65%',
+                height: '14.45%',
+                borderRadius: '2.79vw',
+                fontSize: '1.7vw',
+                animationDelay: '520ms',
+              }}
             >
-              Congratulations!
-            </h1>
-            <p className="q-card-in mt-[0.7vw] text-[1.15vw] leading-snug text-white/90" style={{ animationDelay: '360ms' }}>
-              You have completed this region.
-            </p>
-            <p className="q-card-in text-[1.15vw] leading-snug text-white/90" style={{ animationDelay: '420ms' }}>
-              You get a new stamp in your digital passport.
-            </p>
-          </div>
-          <button
-            onClick={onContinue}
-            className="q-card-in absolute flex items-center justify-center gap-[0.8vw] bg-white font-bold text-[#004C42] transition-opacity hover:opacity-90"
-            style={{
-              top: '50%',
-              left: '38.82%',
-              width: '39.65%',
-              height: '14.45%',
-              borderRadius: '2.79vw',
-              fontSize: '1.7vw',
-              animationDelay: '520ms',
-            }}
-          >
-            <span>{allDone ? 'View my summary' : 'Continue to the next destination'}</span>
-            <ArrowRight className="h-[1.6vw] w-[1.6vw] shrink-0" strokeWidth={3} />
-          </button>
+              <span>View my summary</span>
+              <ArrowRight className="h-[1.6vw] w-[1.6vw] shrink-0" strokeWidth={3} />
+            </button>
+          ) : (
+            <>
+              <img
+                src="/stamp-continue.svg"
+                alt=""
+                className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+                style={{ animationDelay: '520ms' }}
+              />
+              <button
+                onClick={onContinue}
+                className="absolute cursor-pointer bg-transparent"
+                style={{ top: '50%', left: '38.82%', width: '39.65%', height: '14.45%' }}
+                aria-label="Continue to the next destination"
+              />
+            </>
+          )}
+          <img
+            src="/stamp-finish.svg"
+            alt=""
+            className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+            style={{ animationDelay: '620ms' }}
+          />
           <button
             onClick={onFinish}
-            className="q-card-in absolute flex items-center justify-center gap-[0.7vw] bg-transparent font-bold text-white"
-            style={{
-              top: '68.55%',
-              left: '42.01%',
-              width: '23.75%',
-              height: '4.88%',
-              fontSize: '1.15vw',
-              animationDelay: '620ms',
-            }}
-          >
-            <span className="underline decoration-1 underline-offset-[0.35vw]">Finish my journey</span>
-            <span className="grid h-[90%] aspect-square place-items-center rounded-[0.55vw] border-2 border-white">
-              <ArrowRight className="h-[55%] w-[55%]" strokeWidth={3} />
-            </span>
-          </button>
+            className="absolute cursor-pointer bg-transparent"
+            style={{ top: '68.55%', left: '42.01%', width: '23.75%', height: '4.88%' }}
+            aria-label="Finish my journey"
+          />
         </div>
       </div>
 
@@ -821,7 +828,7 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
               style={{ animationDelay: '120ms' }}
             />
 
-            <h1 className="q-card-in mt-8 font-display text-3xl font-bold uppercase leading-tight tracking-wide" style={{ animationDelay: '280ms' }}>
+            <h1 className="q-card-in mt-8 text-3xl font-bold uppercase leading-tight tracking-tight" style={{ animationDelay: '280ms', fontFamily: 'Saudi, sans-serif' }}>
               Congratulations!
             </h1>
             <p className="q-card-in mt-2 text-sm text-white/85" style={{ animationDelay: '360ms' }}>You have completed this region.</p>
