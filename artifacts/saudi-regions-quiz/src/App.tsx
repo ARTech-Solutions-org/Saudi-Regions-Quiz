@@ -116,7 +116,8 @@ function AutoFitText({
         maxHeight: '100%',
         overflow: 'hidden',
         fontSize: maxSize,
-        lineHeight: lineHeight ?? 1.2,
+        lineHeight: lineHeight ?? 1.1865,
+        letterSpacing: 0,
         textAlign: 'center',
         overflowWrap: 'anywhere',
         wordBreak: 'break-word',
@@ -578,7 +579,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                   const isAnswer = answered && oIndex === question.answer;
                   const isWrong = wrongs.includes(oIndex);
 
-                  let btnClass = "bg-transparent border-none text-[#2D2D2D]/50";
+                  let btnClass = "bg-transparent border-none text-[#2D2D2D]";
                   if (isAnswer) btnClass = "bg-[#004C42] text-white shadow-sm answer-correct";
                   else if (isWrong) btnClass = "bg-[#ffe5e5] text-[#d9383a] answer-wrong";
 
@@ -597,9 +598,9 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                       <span className="flex h-full w-full items-center justify-center overflow-hidden py-[4%]">
                         <AutoFitText
                           text={option}
-                          maxSize="1.39vw"
+                          maxSize="1.3889vw"
                           minSize="0.75vw"
-                          lineHeight="1.15"
+                          lineHeight="1.1865"
                         />
                       </span>
                       {isAnswer && <Check size={16} strokeWidth={4} className="check-pop pointer-events-none absolute right-[6%] text-white" />}
@@ -715,12 +716,12 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                           fontWeight: 600,
                           letterSpacing: 0,
                           background: isAnswer ? '#004C42' : isWrong ? '#ffe5e5' : '#ffffff',
-                          color: isAnswer ? '#ffffff' : isWrong ? '#d9383a' : 'rgba(45, 45, 45, 0.5)',
+                          color: isAnswer ? '#ffffff' : isWrong ? '#d9383a' : '#2D2D2D',
                           borderColor: isAnswer ? '#004C42' : isWrong ? '#f3b4b4' : '#c8d0cc',
                         }}
                       >
                         <span className="min-w-0 flex-1 overflow-hidden pr-2">
-                          <AutoFitText text={option} maxSize="16px" minSize="11px" lineHeight="1.2" />
+                          <AutoFitText text={option} maxSize="20px" minSize="12px" lineHeight="1.1865" />
                         </span>
                         {isAnswer && <Check size={18} strokeWidth={3} className="check-pop shrink-0 text-white" />}
                       </button>
