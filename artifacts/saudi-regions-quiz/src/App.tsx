@@ -191,13 +191,13 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
               }}
             />
 
-            {/* The White Journey Card */}
+            {/* The White Journey Card — sizes matched to Figma card proportions */}
             <div
-              className="relative z-[2] w-full bg-white rounded-[24px] sm:rounded-[34px] p-5 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.28)] border border-white/70 box-border"
+              className="relative z-[2] w-full box-border rounded-[32px] border border-white/70 bg-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.28)] sm:rounded-[40px] sm:p-10 lg:p-11"
             >
-              {/* Headline — Figma uses Saudi Bold; size ~44px on the card */}
+              {/* Headline — Saudi Bold; Figma ~34–36px with tight leading */}
               <h1
-                className="font-saudi mb-2 text-[22px] font-bold uppercase leading-[1] tracking-normal text-[#004C42] sm:mb-2.5 sm:text-[32px] lg:text-[44px]"
+                className="font-saudi mb-2 text-[26px] font-bold uppercase leading-[0.95] tracking-normal text-[#004C42] sm:text-[32px] lg:text-[36px]"
                 data-testid="text-welcome-title"
               >
                 YOUR JOURNEY
@@ -206,12 +206,12 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
               </h1>
 
               {/* Subheading */}
-              <p className="font-saudi mb-5 text-[13px] font-normal leading-snug text-[#767676] sm:mb-7 sm:text-[15px] lg:text-[16px]">
+              <p className="font-saudi mb-7 text-[14px] font-normal leading-snug text-[#5C5C5C] sm:text-[16px] lg:text-[17px]">
                 One passport. A journey across Saudi Arabia.
               </p>
 
               {/* Interactive Form */}
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4" noValidate>
+              <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4" noValidate>
                 {/* Full Name Input */}
                 <div>
                   <input
@@ -222,7 +222,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your full name"
                     data-testid="input-player-name"
                     aria-label="Enter your full name"
-                    className="font-saudi w-full h-11 sm:h-14 px-4 sm:px-6 rounded-full text-sm sm:text-[16px] text-gray-900 placeholder:text-gray-400 outline-none transition-all duration-200 box-border"
+                    className="font-saudi box-border h-12 w-full rounded-full px-6 text-[15px] text-gray-900 outline-none transition-all duration-200 placeholder:text-[#A1A1A1] sm:h-14 sm:text-[17px]"
                     style={{
                       border: touched && name.trim().length <= 1 ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
                       backgroundColor: '#ffffff',
@@ -248,7 +248,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your email address"
                     data-testid="input-player-email"
                     aria-label="Enter your email address"
-                    className="font-saudi w-full h-11 sm:h-14 px-4 sm:px-6 rounded-full text-sm sm:text-[16px] text-gray-900 placeholder:text-gray-400 outline-none transition-all duration-200 box-border"
+                    className="font-saudi box-border h-12 w-full rounded-full px-6 text-[15px] text-gray-900 outline-none transition-all duration-200 placeholder:text-[#A1A1A1] sm:h-14 sm:text-[17px]"
                     style={{
                       border: touched && !email.includes('@') ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
                       backgroundColor: '#ffffff',
@@ -264,12 +264,12 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
-                {/* Submit Button */}
-                <div className="pt-1.5 sm:pt-2">
+                {/* Submit Button — Figma text node ~167×45 → ~32px Regular */}
+                <div className="pt-1">
                   <button
                     type="submit"
                     data-testid="button-start-journey"
-                    className="font-saudi flex h-11 w-full cursor-pointer items-center justify-center rounded-full text-[15px] font-normal tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 sm:h-14 sm:text-[18px]"
+                    className="font-saudi flex h-12 w-full cursor-pointer items-center justify-center rounded-full text-[17px] font-normal tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 sm:h-[56px] sm:text-[20px] lg:h-[60px] lg:text-[24px]"
                     style={{
                       backgroundColor: '#004C42',
                     }}
@@ -286,7 +286,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
               </form>
 
               {/* Footnote */}
-              <p className="font-saudi mt-3.5 text-center text-[10px] font-normal leading-normal text-[#767676] sm:mt-6 sm:text-[12px]">
+              <p className="font-saudi mt-5 text-center text-[11px] font-normal leading-normal text-[#767676] sm:mt-6 sm:text-[13px]">
                 Your name and email link your score, progress and stamps.
               </p>
             </div>
