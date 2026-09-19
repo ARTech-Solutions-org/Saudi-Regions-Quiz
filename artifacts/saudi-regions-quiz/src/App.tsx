@@ -297,26 +297,53 @@ function Stamp({ region, complete, index, big = false }: { region: Region; compl
   );
 }
 
-// RegionSelect has been removed per user request, regions now flow sequentially.
-
-// RegionSelect has been removed per user request, regions now flow sequentially.
+function ScreenHeader() {
+  return (
+    <header className="w-full bg-white relative z-20 shrink-0 border-b border-gray-100 flex items-center justify-between px-4 sm:px-8 py-2.5 sm:py-4">
+      <img
+        src="/lilly_logo.svg"
+        alt="Lilly - A Medicine Company"
+        className="h-6 sm:h-9 w-auto object-contain"
+        style={{ maxHeight: '36px', maxWidth: '110px' }}
+      />
+      <img
+        src="/national_day_logo.svg"
+        alt="اليوم الوطني السعودي - عزنا بطبعنا"
+        className="h-6 sm:h-9 w-auto object-contain"
+        style={{ maxHeight: '36px', maxWidth: '210px' }}
+      />
+    </header>
+  );
+}
 
 function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport }: { region: Region; journey: SavedJourney; onComplete: (regionId: string) => void; onAnswer: (regionId: string, questionIndex: number, answer: number) => void; onFinish: () => void; onViewPassport: () => void }) {
   const existing = journey.answers[region.id] ?? [];
   const allAnswered = region.questions.every((_, idx) => existing[idx] !== undefined);
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, number[]>>({});
+  const regionNumber = Math.min(journey.completed.length + 1, regions.length);
+  const progress = (regionNumber / regions.length) * 100;
 
-  // Reset wrong attempts when region changes
   useEffect(() => {
     setWrongAttempts({});
   }, [region.id]);
 
+  const pickOption = (qIndex: number, oIndex: number, answered: boolean, isWrong: boolean) => {
+    if (answered || isWrong) return;
+    if (oIndex === region.questions[qIndex].answer) {
+      onAnswer(region.id, qIndex, oIndex);
+    } else {
+      setWrongAttempts((prev) => ({
+        ...prev,
+        [qIndex]: [...(prev[qIndex] || []), oIndex],
+      }));
+    }
+  };
+
   return (
     <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
 
-      
-      {/* The main scalable container that matches the SVG's 1440x1024 viewBox */}
-      <div className="relative w-full aspect-[1440/1024] bg-white overflow-hidden">
+      {/* Desktop Figma frame — readable from ~1024px up */}
+      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-white lg:block">
         
         {/* The SVG Background (No Text). Using it precisely as the layout! */}
         <img 
@@ -382,17 +409,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                   return (
                     <button
                       key={oIndex}
-                      onClick={() => {
-                        if (answered || isWrong) return;
-                        if (oIndex === question.answer) {
-                          onAnswer(region.id, qIndex, oIndex);
-                        } else {
-                          setWrongAttempts(prev => ({
-                            ...prev,
-                            [qIndex]: [...(prev[qIndex] || []), oIndex]
-                          }));
-                        }
-                      }}
+                      onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
                       disabled={answered || isWrong}
                       className={`w-full h-[46.5%] text-[1.2vw] xl:text-[20px] font-semibold transition-all ${btnClass} flex items-center justify-between px-[6%] focus:outline-none`}
                       style={{ borderRadius: '0.6vw' }}
@@ -430,6 +447,85 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         </button>
 
       </div>
+
+      {/* Mobile / tablet stacked layout */}
+      <div className="flex min-h-dvh flex-col bg-[#ebeae4] lg:hidden">
+        <ScreenHeader />
+
+        <div className="bg-[#004C42] px-4 py-4 text-white">
+          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-white/70">
+            Region {regionNumber} of {regions.length}
+          </p>
+          <h1 className="mt-1 text-2xl font-bold uppercase tracking-wide leading-tight">
+            {region.name} Region
+          </h1>
+          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/20">
+            <div
+              className="h-full rounded-full bg-[#d7a34d] transition-all duration-700"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col gap-4 px-4 py-5 pb-8">
+          {region.questions.map((question, qIndex) => {
+            const selected = existing[qIndex];
+            const answered = selected !== undefined && selected !== null;
+            const wrongs = wrongAttempts[qIndex] || [];
+
+            return (
+              <section
+                key={qIndex}
+                className="rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
+              >
+                <p className="mb-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#668078]">
+                  Question {qIndex + 1}
+                </p>
+                <p className="mb-4 text-base font-bold leading-snug text-[#004C42]">
+                  {question.prompt}
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  {question.options.map((option, oIndex) => {
+                    const isAnswer = answered && oIndex === question.answer;
+                    const isWrong = wrongs.includes(oIndex);
+
+                    return (
+                      <button
+                        key={oIndex}
+                        onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
+                        disabled={answered || isWrong}
+                        className="flex min-h-12 w-full items-center justify-between rounded-full border px-4 py-3 text-left text-[15px] font-semibold leading-snug transition-all disabled:cursor-not-allowed"
+                        style={{
+                          background: isAnswer ? '#004C42' : isWrong ? '#ffe5e5' : '#ffffff',
+                          color: isAnswer ? '#fffaf0' : isWrong ? '#d9383a' : '#004C42',
+                          borderColor: isAnswer ? '#004C42' : isWrong ? '#f3b4b4' : '#c8d0cc',
+                        }}
+                      >
+                        <span className="pr-2">{option}</span>
+                        {isAnswer && <Check size={18} strokeWidth={3} className="shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+
+          <button
+            onClick={() => allAnswered && onComplete(region.id)}
+            disabled={!allAnswered}
+            className="mt-2 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#004C42] text-base font-bold text-white shadow-[0_8px_20px_rgba(0,89,77,.16)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {journey.completed.length + 1 >= regions.length ? 'Finish Quiz' : 'Submit answers'}
+          </button>
+          <button
+            onClick={onFinish}
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#004C42]/40 bg-transparent text-sm font-bold text-[#004C42]"
+          >
+            Finish my journey
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -439,7 +535,7 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
   
   return (
     <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
-      <div className="relative w-full aspect-[1440/1024] bg-[#F2F2F2] overflow-hidden">
+      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
         <img 
           src="/frame4.svg" 
           alt="Final Score Summary" 
@@ -516,6 +612,46 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           <PrimaryButton onClick={onViewPassport} testId="button-view-passport">
             View My Passport
           </PrimaryButton>
+        </div>
+      </div>
+
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#004C42] lg:hidden">
+        <ScreenHeader />
+        <img
+          src="/welcome_bg.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-35"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#004C42]/70 via-[#004C42]/80 to-[#00352e]" />
+
+        <div className="relative z-10 flex flex-1 flex-col px-5 py-8 text-white">
+          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Saudi National Day edition</p>
+          <h1 className="mt-2 font-display text-3xl font-bold uppercase leading-tight tracking-wide">
+            Congratulations!
+          </h1>
+          <p className="mt-2 text-sm text-white/80">Your passport journey across Saudi Arabia.</p>
+
+          <div className="mt-8 space-y-4">
+            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
+              <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Game score</p>
+              <p className="mt-2 font-display text-6xl font-bold leading-none">{journey.score}</p>
+            </div>
+            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
+              <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Regions completed</p>
+              <p className="mt-2 font-display text-6xl font-bold leading-none">
+                {completedRegions.length}
+                <span className="text-3xl opacity-80">/{regions.length}</span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onViewPassport}
+            data-testid="button-view-passport-mobile"
+            className="mt-auto inline-flex min-h-14 w-full items-center justify-center rounded-full bg-white text-base font-bold text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)]"
+          >
+            View My Passport
+          </button>
         </div>
       </div>
     </div>

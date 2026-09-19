@@ -49,7 +49,7 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       {/* Close Button */}
       <button 
         onClick={onClose}
