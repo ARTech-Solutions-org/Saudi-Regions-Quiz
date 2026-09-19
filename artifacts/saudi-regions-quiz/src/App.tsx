@@ -449,7 +449,15 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
       </div>
 
       {/* Mobile / tablet stacked layout */}
-      <div className="flex min-h-dvh flex-col bg-[#ebeae4] lg:hidden">
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#ebeae4] lg:hidden">
+        <img
+          src="/frame2_no_text.svg"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-left-top opacity-40"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-white/55" />
+
+        <div className="relative z-10 flex min-h-dvh flex-col">
         <ScreenHeader />
 
         <div className="bg-[#004C42] px-4 py-4 text-white">
@@ -459,11 +467,16 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           <h1 className="mt-1 text-2xl font-bold uppercase tracking-wide leading-tight">
             {region.name} Region
           </h1>
-          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/20">
+        </div>
+
+        <div className="px-4 pt-4">
+          <div className="relative h-8 w-full overflow-hidden rounded-full bg-[#d8e2de]">
             <div
-              className="h-full rounded-full bg-[#d7a34d] transition-all duration-700"
+              className="absolute inset-y-0 left-0 flex min-w-[3.25rem] items-center rounded-full bg-[#004C42] pl-3 text-[11px] font-bold text-white transition-all duration-700"
               style={{ width: `${progress}%` }}
-            />
+            >
+              Q{regionNumber}
+            </div>
           </div>
         </div>
 
@@ -520,10 +533,11 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           </button>
           <button
             onClick={onFinish}
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#004C42]/40 bg-transparent text-sm font-bold text-[#004C42]"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#004C42]/40 bg-white/85 text-sm font-bold text-[#004C42]"
           >
             Finish my journey
           </button>
+        </div>
         </div>
       </div>
     </div>
