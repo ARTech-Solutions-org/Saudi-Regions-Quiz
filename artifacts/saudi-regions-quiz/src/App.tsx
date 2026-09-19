@@ -197,7 +197,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
             >
               {/* Headline */}
               <h1
-                className="text-[21px] sm:text-[28px] lg:text-[32px] font-black text-[#004C42] tracking-tight leading-tight uppercase font-display mb-1.5 sm:mb-2"
+                className="font-saudi mb-1.5 text-[21px] font-bold uppercase leading-[1.05] tracking-normal text-[#004C42] sm:mb-2 sm:text-[28px] lg:text-[36px]"
                 data-testid="text-welcome-title"
               >
                 YOUR JOURNEY
@@ -269,7 +269,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   <button
                     type="submit"
                     data-testid="button-start-journey"
-                    className="w-full h-11 sm:h-14 rounded-full text-white font-bold text-sm sm:text-base tracking-wide flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                    className="font-saudi flex h-11 w-full cursor-pointer items-center justify-center rounded-full text-sm font-bold tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 sm:h-14 sm:text-base"
                     style={{
                       backgroundColor: '#004C42',
                     }}
@@ -395,10 +395,10 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         
         {/* Overlay 1: Top Banner (Text Only) */}
         <div 
-          className="absolute flex items-center justify-start pl-[5%]"
-          style={{ top: '0%', left: '0%', width: '45%', height: '18%' }}
+          className="absolute"
+          style={{ top: `${((114.5 - 100) / 1024) * 100}%`, left: `${(77 / 1440) * 100}%` }}
         >
-          <h1 key={shownRegion.id} className={`${regionAnim} text-white text-[4.5vw] xl:text-[75px] font-bold uppercase tracking-widest leading-none mt-[-2%]`}>
+          <h1 key={shownRegion.id} className={`${regionAnim} font-saudi text-[6.94vw] font-bold uppercase leading-none tracking-normal text-white`}>
             {shownRegion.name} REGION
           </h1>
         </div>
@@ -409,7 +409,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           style={{ top: '21.87%', left: '42.01%', width: '40.97%', height: '4.10%' }}
         >
           <div 
-            className="absolute top-0 left-0 h-full bg-[#004C42] rounded-full flex items-center pl-4 text-white text-[1.5vw] xl:text-[24px] font-bold transition-all duration-700"
+            className="absolute top-0 left-0 flex h-full items-center justify-center rounded-full bg-[#004C42] text-[1.65vw] font-bold text-white transition-all duration-700"
             style={{ width: `${((journey.completed.length + 1) / regions.length) * 100}%` }}
           >
             Q{journey.completed.length + 1}
@@ -428,14 +428,14 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
             <div key={qIndex}>
               {/* Question Box (Transparent bg, SVG draws the white box) */}
               <div 
-                className="absolute flex items-center overflow-hidden px-[3%]"
+                className="absolute flex items-center overflow-hidden pl-[7.3%] pr-[4%]"
                 style={{ top: `${topPer}%`, left: '42.01%', width: '29.09%', height: '13.76%' }}
               >
                 <div
                   className={`${leaving ? 'q-card-out' : 'q-card-in'} flex h-full w-full items-center`}
                   style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
                 >
-                  <p className="text-[#004C42] font-bold text-[1.8vw] xl:text-[28px] leading-snug">{question.prompt}</p>
+                  <p className="font-saudi text-[2.43vw] font-bold leading-[0.86] tracking-normal text-[#004C42]">{question.prompt}</p>
                 </div>
               </div>
 
@@ -452,7 +452,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                   const isAnswer = answered && oIndex === question.answer;
                   const isWrong = wrongs.includes(oIndex);
 
-                  let btnClass = "bg-transparent border-none text-[#004C42] hover:bg-[#004C42]/10";
+                  let btnClass = "bg-transparent border-none text-[#2D2D2D]/50";
                   if (isAnswer) btnClass = "bg-[#004C42] text-white shadow-sm answer-correct";
                   else if (isWrong) btnClass = "bg-[#ffe5e5] text-[#d9383a] answer-wrong";
 
@@ -461,11 +461,11 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                       key={oIndex}
                       onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
                       disabled={leaving || answered || isWrong}
-                      className={`w-full h-[46.5%] text-[1.2vw] xl:text-[20px] font-semibold transition-all duration-200 ${btnClass} flex items-center justify-between px-[6%] focus:outline-none`}
+                      className={`font-mod relative flex h-[46.5%] w-full items-center justify-center px-[8%] text-center text-[1.39vw] leading-[1.18] tracking-normal transition-all duration-200 ${btnClass} focus:outline-none`}
                       style={{ borderRadius: '0.6vw' }}
                     >
-                      <span className="truncate pr-1">{option}</span>
-                      {isAnswer && <Check size={20} strokeWidth={4} className="check-pop text-white flex-shrink-0" />}
+                      <span className="max-w-full whitespace-pre-line">{option}</span>
+                      {isAnswer && <Check size={16} strokeWidth={4} className="check-pop pointer-events-none absolute right-[6%] text-white" />}
                     </button>
                   );
                 })}
@@ -480,8 +480,8 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         <button 
           onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
           disabled={!allAnswered || leaving}
-          className={`absolute bg-transparent flex items-center justify-center font-bold text-[2.2vw] xl:text-[36px] transition-all focus:outline-none ${
-            allAnswered ? `text-white hover:opacity-80 ${submitPulse ? 'submit-ready-text' : ''}` : 'text-white/50 cursor-not-allowed'
+          className={`font-saudi absolute flex items-center justify-center text-[2.64vw] font-normal tracking-normal transition-all focus:outline-none ${
+            allAnswered ? `text-white hover:opacity-80 ${submitPulse ? 'submit-ready-text' : ''}` : 'cursor-not-allowed text-white/50'
           }`}
           style={{ top: '82.81%', left: '42.01%', width: '29.44%', height: '7.03%' }}
         >
@@ -491,7 +491,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         {/* Finish Journey Button Overlay */}
         <button
           onClick={onFinish}
-          className="absolute bg-transparent border-none shadow-none flex items-center justify-center font-bold text-[#004C42] text-[1.6vw] xl:text-[26px] hover:opacity-70 transition-all focus:outline-none"
+          className="font-saudi absolute flex items-center justify-center bg-transparent text-[2.08vw] font-normal tracking-normal text-[#004C42] shadow-none transition-all hover:opacity-70 focus:outline-none"
           style={{ top: '82.81%', left: '72.91%', width: '13.05%', height: '7.03%' }}
         >
           Finish my journey
@@ -610,69 +610,79 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           alt="Final Score Summary" 
           className="absolute inset-0 w-full h-full object-contain pointer-events-none" 
         />
-        
-        {/* CONGRATULATIONS! Title (X: 77, Y: 62) */}
-        <div 
-          className="absolute flex items-center justify-start font-display font-bold text-white uppercase tracking-wider"
-          style={{ 
-            top: '6.05%', 
-            left: '5.35%', 
-            width: '30%', 
-            height: '5.37%', 
-            fontSize: '4vw',
-            lineHeight: 0.55
+
+        {/* CONGRATULATIONS! — Figma: Saudi Bold 100px, x 77 y 114.5 */}
+        <div
+          className="font-saudi pointer-events-none absolute whitespace-nowrap font-bold uppercase text-white"
+          style={{
+            top: `${((114.5 - 100) / 1024) * 100}%`,
+            left: `${(77 / 1440) * 100}%`,
+            fontSize: '6.94vw',
+            lineHeight: 1,
+            letterSpacing: 0,
           }}
         >
           CONGRATULATIONS!
         </div>
 
-        {/* GAME SCORE Title (Estimated above Score) */}
-        <div 
-          className="absolute flex items-end justify-center font-display text-white tracking-[0.2em]"
-          style={{ top: '24%', left: '55%', width: '40%', height: '6%', fontSize: '3vw' }}
+        {/* GAME SCORE — Figma: Saudi Regular 100px, x 888.56 y 336.5 */}
+        <div
+          className="font-saudi pointer-events-none absolute whitespace-nowrap text-white"
+          style={{
+            top: `${((336.5 - 100) / 1024) * 100}%`,
+            left: `${(888.559 / 1440) * 100}%`,
+            fontSize: '6.94vw',
+            lineHeight: 1,
+            letterSpacing: 0,
+            fontWeight: 400,
+          }}
         >
           GAME SCORE
         </div>
 
-        {/* Dynamic Game Score (X: 1025, Y: 332) */}
-        <div 
-          className="absolute flex items-center justify-center font-display font-bold text-white"
-          style={{ 
-            top: '32.42%', 
-            left: '71.18%', 
-            width: '16.74%', 
-            height: '13.09%', 
-            fontSize: '13.89vw', 
-            lineHeight: 0.67 
+        {/* Dynamic Game Score — Figma: Saudi Bold 200px, x 1025.77 y 449 */}
+        <div
+          className="font-saudi pointer-events-none absolute whitespace-nowrap font-bold text-white"
+          style={{
+            top: `${((449 - 200) / 1024) * 100}%`,
+            left: `${(1025.77 / 1440) * 100}%`,
+            fontSize: '13.89vw',
+            lineHeight: 1,
+            letterSpacing: 0,
           }}
         >
           {animatedScore}
         </div>
 
-        {/* REGIONS COMPLETED Title (Estimated above Regions) */}
-        <div 
-          className="absolute flex items-center justify-center font-display text-white tracking-[0.2em]"
-          style={{ top: '56%', left: '55%', width: '40%', height: '6%', fontSize: '2.5vw' }}
+        {/* REGIONS COMPLETED — Figma: Saudi Regular 100px, x 639.83 y 660.5 */}
+        <div
+          className="font-saudi pointer-events-none absolute whitespace-nowrap text-white"
+          style={{
+            top: `${((660.5 - 100) / 1024) * 100}%`,
+            left: `${(639.828 / 1440) * 100}%`,
+            fontSize: '6.94vw',
+            lineHeight: 1,
+            letterSpacing: 0,
+            fontWeight: 400,
+          }}
         >
           REGIONS COMPLETED
         </div>
 
-        {/* Dynamic Regions Completed (X: 1080, Y: 656) */}
-        <div 
-          className="absolute flex items-center justify-center font-display font-bold text-white"
-          style={{ 
-            top: '64.06%', 
-            left: '75%', 
-            width: '12.92%', 
-            height: '13.09%', 
-            fontSize: '13.89vw', 
-            lineHeight: 0.67 
+        {/* Dynamic Regions Completed — Figma number Bold 200px, /13 Regular 100px */}
+        <div
+          className="font-saudi pointer-events-none absolute flex items-baseline whitespace-nowrap text-white"
+          style={{
+            top: `${((773 - 200) / 1024) * 100}%`,
+            left: `${(1025.77 / 1440) * 100}%`,
+            fontSize: '13.89vw',
+            lineHeight: 1,
+            letterSpacing: 0,
+            fontWeight: 700,
           }}
         >
-          <div className="flex items-baseline">
-            <span>{animatedRegions}</span>
-            <span className="text-[7vw] opacity-80">/13</span>
-          </div>
+          <span>{animatedRegions}</span>
+          <span style={{ fontSize: '6.94vw', fontWeight: 400 }}>/{regions.length}</span>
         </div>
 
 
@@ -695,7 +705,7 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
 
         <div className="relative z-10 flex flex-1 flex-col px-5 py-8 text-white">
           <p className="text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Saudi National Day edition</p>
-          <h1 className="mt-2 font-display text-3xl font-bold uppercase leading-tight tracking-wide">
+          <h1 className="font-saudi mt-2 text-3xl font-bold uppercase leading-tight tracking-normal">
             Congratulations!
           </h1>
           <p className="mt-2 text-sm text-white/80">Your passport journey across Saudi Arabia.</p>
@@ -703,11 +713,11 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           <div className="mt-8 space-y-4">
             <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
               <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Game score</p>
-              <p className="mt-2 font-display text-6xl font-bold leading-none">{animatedScore}</p>
+              <p className="font-saudi mt-2 text-6xl font-bold leading-none">{animatedScore}</p>
             </div>
             <div className="rounded-[24px] bg-white/12 px-5 py-6 text-center backdrop-blur-sm">
               <p className="text-xs font-bold uppercase tracking-[.2em] text-white/80">Regions completed</p>
-              <p className="mt-2 font-display text-6xl font-bold leading-none">
+              <p className="font-saudi mt-2 text-6xl font-bold leading-none">
                 {animatedRegions}
                 <span className="text-3xl opacity-80">/{regions.length}</span>
               </p>
