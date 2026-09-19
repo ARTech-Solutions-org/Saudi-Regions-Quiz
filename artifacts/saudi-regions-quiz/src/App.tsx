@@ -725,30 +725,73 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
   );
 }
 
-function StampScreen({ onContinue, onFinish }: { onContinue: () => void; onFinish: () => void }) {
+function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void; onFinish: () => void; allDone: boolean }) {
   return (
-    <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
-      <div className="relative w-full aspect-[1440/1024] bg-[#F2F2F2] overflow-hidden">
-        <img 
-          src="/frame3.svg" 
-          alt="Region Completed Stamp" 
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none" 
+    <div className="screen-in flex w-full flex-col bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
+      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
+        <img
+          src="/frame3.svg"
+          alt="Region Completed Stamp"
+          className="pointer-events-none absolute inset-0 h-full w-full object-contain"
         />
-        {/* Button 1: Continue (White Pill) - Exact Figma Coordinates */}
-        <button 
+        <button
           onClick={onContinue}
-          className="absolute bg-transparent cursor-pointer"
+          className="absolute cursor-pointer bg-transparent"
           style={{ top: '50%', left: '38.82%', width: '39.65%', height: '14.45%' }}
-          aria-label="Continue to the next destination"
+          aria-label={allDone ? 'View my summary' : 'Continue to the next destination'}
         />
-        
-        {/* Button 2: Finish - Exact Figma Coordinates */}
-        <button 
+        <button
           onClick={onFinish}
-          className="absolute bg-transparent cursor-pointer"
+          className="absolute cursor-pointer bg-transparent"
           style={{ top: '68.55%', left: '42.01%', width: '23.75%', height: '4.88%' }}
           aria-label="Finish my journey"
         />
+      </div>
+
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#004C42] lg:hidden">
+        <img
+          src="/welcome_bg.jpg"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-35"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-[#004C42]/70" />
+
+        <div className="relative z-10 flex min-h-dvh flex-col">
+          <ScreenHeader />
+
+          <div className="flex flex-1 flex-col items-center px-5 py-8 text-center text-white">
+            <p className="text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Your passport</p>
+
+            <div className="stamp-pop mt-7 grid h-48 w-48 place-items-center rounded-full border-[5px] border-white bg-white/10 shadow-[0_16px_40px_rgba(0,0,0,.28)]">
+              <div className="grid h-[86%] w-[86%] place-items-center rounded-full border border-dashed border-white/85">
+                <div>
+                  <Check size={40} strokeWidth={3} className="mx-auto" />
+                  <p className="mt-2 font-display text-lg font-bold tracking-[.16em]">COMPLETED</p>
+                </div>
+              </div>
+            </div>
+
+            <h1 className="mt-8 font-display text-3xl font-bold uppercase leading-tight tracking-wide">
+              Congratulations!
+            </h1>
+            <p className="mt-2 text-sm text-white/85">You have completed this region.</p>
+            <p className="mt-1 text-xs text-white/70">You get a new stamp in your digital passport.</p>
+
+            <button
+              onClick={onContinue}
+              className="mt-8 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-white text-base font-bold text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)]"
+            >
+              <span>{allDone ? 'View my summary' : 'Continue to the next destination'}</span>
+              <ArrowRight size={18} />
+            </button>
+            <button
+              onClick={onFinish}
+              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4"
+            >
+              Finish my journey
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -808,14 +851,12 @@ function App() {
     });
   };
 
-  const completeRegion = (id: string) => { 
+  const completeRegion = (id: string) => {
     setJourney((prev) => {
-       const newCompleted = prev.completed.includes(id) ? prev.completed : [...prev.completed, id];
-       const allDone = newCompleted.length >= regions.length;
-       // Go directly to summary if all regions done, else continue quiz
-       setScreen(allDone ? 'summary' : 'quiz');
-       return { ...prev, completed: newCompleted };
+      const newCompleted = prev.completed.includes(id) ? prev.completed : [...prev.completed, id];
+      return { ...prev, completed: newCompleted };
     });
+    setScreen('stamp');
   };
 
   const restart = () => { 
@@ -838,7 +879,13 @@ function App() {
       )}
       {screen === 'welcome' && <Welcome journey={journey} onStart={start} />}
       {screen === 'quiz' && activeRegion && <Quiz region={activeRegion} journey={journey} onComplete={completeRegion} onAnswer={answer} onFinish={() => setScreen('summary')} onViewPassport={() => setShowPassport(true)} />}
-      {screen === 'stamp' && <StampScreen onContinue={() => setScreen('quiz')} onFinish={() => setScreen('summary')} />}
+      {screen === 'stamp' && (
+        <StampScreen
+          allDone={journey.completed.length >= regions.length}
+          onContinue={() => setScreen(journey.completed.length >= regions.length ? 'summary' : 'quiz')}
+          onFinish={() => setScreen('summary')}
+        />
+      )}
       {screen === 'summary' && <Summary journey={journey} onRestart={restart} onViewPassport={() => setShowPassport(true)} />}
       
       {showPassport && (
