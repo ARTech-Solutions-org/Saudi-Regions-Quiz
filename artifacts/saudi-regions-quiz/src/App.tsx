@@ -453,9 +453,9 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         <img
           src="/frame2_no_text.svg"
           alt=""
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-left-top opacity-40"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-left-top opacity-70"
         />
-        <div className="pointer-events-none absolute inset-0 bg-white/55" />
+        <div className="pointer-events-none absolute inset-0 bg-white/30" />
 
         <div className="relative z-10 flex min-h-dvh flex-col">
         <ScreenHeader />

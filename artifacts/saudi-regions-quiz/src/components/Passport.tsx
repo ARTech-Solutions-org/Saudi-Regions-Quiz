@@ -49,7 +49,7 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       {/* Close Button */}
       <button 
         onClick={onClose}
@@ -72,7 +72,7 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
         className={`relative transition-all duration-700 ease-in-out ${
           isOpen
             ? 'w-full max-w-5xl aspect-[1440/1024]'
-            : 'w-[40%] max-w-xs aspect-[255/354] cursor-pointer'
+            : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'
         }`}
         style={{
           /* Realistic 3-D book drop shadow */
@@ -126,12 +126,6 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
               }}
             />
 
-            {/* "Open" hint text */}
-            <div className="absolute bottom-4 w-full flex justify-center pointer-events-none">
-              <span className="text-white/40 text-xs tracking-widest uppercase animate-pulse">
-                tap to open
-              </span>
-            </div>
           </div>
 
         ) : (
@@ -201,19 +195,23 @@ export function Passport({ journey, onClose, onResume }: PassportProps) {
           </div>
         )}
 
-        {/* Return to questions button (rendered below the book) */}
-        {isOpen && journey.completed.length < regions.length && (
-          <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 z-50 flex justify-center pointer-events-auto">
-            <button
-              onClick={() => onResume ? onResume() : onClose()}
-              className="bg-[#004C42] hover:bg-[#006255] text-white font-bold py-3 px-8 rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 text-sm sm:text-lg flex items-center gap-2 whitespace-nowrap"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-              Return to Questions
-            </button>
-          </div>
-        )}
       </div>
+
+      {!isOpen && (
+        <p className="relative z-50 mt-5 text-center text-xs font-semibold uppercase tracking-[.22em] text-white/80">
+          tap to open
+        </p>
+      )}
+
+      {isOpen && journey.completed.length < regions.length && (
+        <button
+          onClick={() => onResume ? onResume() : onClose()}
+          className="relative z-50 mt-6 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[#004C42] px-8 py-3 text-sm font-bold text-white shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#006255] sm:text-lg"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          Return to Questions
+        </button>
+      )}
     </div>
   );
 }
