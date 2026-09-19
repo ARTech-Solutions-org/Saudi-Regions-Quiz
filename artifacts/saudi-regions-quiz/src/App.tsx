@@ -732,13 +732,14 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           {animatedScore}
         </div>
 
-        {/* REGIONS COMPLETED — Saudi Regular 400 · 100px · LH 67% · right · Figma y 660.5 */}
+        {/* REGIONS COMPLETED — Figma: x 639, y 602, 627×67, Saudi Regular 100, LH 67%, right */}
         <div
-          className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
+          className="font-saudi pointer-events-none absolute uppercase text-white"
           style={{
-            top: `${(660.5 / 1024) * 100}%`,
-            left: `${(639.83 / 1440) * 100}%`,
-            width: `${((1025 + 241 - 639.83) / 1440) * 100}%`,
+            top: `${(602 / 1024) * 100}%`,
+            left: `${(639 / 1440) * 100}%`,
+            width: `${(627 / 1440) * 100}%`,
+            height: `${(67 / 1024) * 100}%`,
             fontSize: '6.94vw',
             lineHeight: '67%',
             letterSpacing: 0,
@@ -749,13 +750,13 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           Regions completed
         </div>
 
-        {/* Regions value — Figma y 773; same box as score (241×134, right) */}
+        {/* Regions value — Figma: x 1080, y 656, 186×134; 200 Bold + /13 100 Regular */}
         <div
           className="font-saudi pointer-events-none absolute flex items-baseline justify-end uppercase text-white"
           style={{
-            top: `${(773 / 1024) * 100}%`,
-            left: `${(1025 / 1440) * 100}%`,
-            width: `${(241 / 1440) * 100}%`,
+            top: `${(656 / 1024) * 100}%`,
+            left: `${(1080 / 1440) * 100}%`,
+            width: `${(186 / 1440) * 100}%`,
             height: `${(134 / 1024) * 100}%`,
             fontSize: '13.89vw',
             lineHeight: '67%',
