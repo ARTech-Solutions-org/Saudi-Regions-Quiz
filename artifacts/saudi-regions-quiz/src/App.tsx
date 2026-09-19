@@ -426,18 +426,27 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
             <div key={qIndex}>
               {/* Question Box (Transparent bg, SVG draws the white box) */}
               <div 
-                className={`absolute flex items-center px-[3%] ${regionAnim}`}
+                className="absolute flex items-center overflow-hidden px-[3%]"
                 style={{ top: `${topPer}%`, left: '42.01%', width: '29.09%', height: '13.76%' }}
               >
-                <p className="text-[#004C42] font-bold text-[1.8vw] xl:text-[28px] leading-snug">{question.prompt}</p>
+                <div
+                  className={`${leaving ? 'q-card-out' : 'q-card-in'} flex h-full w-full items-center`}
+                  style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
+                >
+                  <p className="text-[#004C42] font-bold text-[1.8vw] xl:text-[28px] leading-snug">{question.prompt}</p>
+                </div>
               </div>
 
               {/* Options Box Overlay */}
               <div 
-                className={`absolute flex flex-col justify-between ${regionAnim}`}
+                className="absolute overflow-hidden"
                 style={{ top: `${topPer - 0.06}%`, left: '72.45%', width: '13.35%', height: '13.9%' }}
               >
-                {question.options.map((option, oIndex) => {
+                <div
+                  className={`${leaving ? 'q-card-out' : 'q-card-in'} flex h-full w-full flex-col justify-between`}
+                  style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90 + 40}ms` }}
+                >
+                  {question.options.map((option, oIndex) => {
                   const isAnswer = answered && oIndex === question.answer;
                   const isWrong = wrongs.includes(oIndex);
 
@@ -458,6 +467,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                     </button>
                   );
                 })}
+                </div>
               </div>
             </div>
           );
