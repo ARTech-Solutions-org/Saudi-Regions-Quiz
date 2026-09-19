@@ -108,6 +108,11 @@ button { cursor: pointer; }
   animation: bg-fade-in 1.1s ease both, ken-burns-bg 24s ease-in-out 1.1s alternate infinite;
   transform-origin: left top;
 }
+.mobile-stamp-art {
+  animation: bg-fade-in-stamp 1.1s ease both, ken-burns-bg 24s ease-in-out 1.1s alternate infinite;
+  transform-origin: center;
+}
+@keyframes bg-fade-in-stamp { from { opacity: 0; } to { opacity: .35; } }
 @keyframes ken-burns-bg { from { transform: scale(1); } to { transform: scale(1.08); } }
 .dot-pattern { background-image: radial-gradient(rgba(239,197,105,.23) 1px, transparent 1px); background-size: 15px 15px; }
 @media (prefers-reduced-motion: reduce) {

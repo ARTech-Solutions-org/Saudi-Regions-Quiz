@@ -729,64 +729,73 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
   return (
     <div className="screen-in flex w-full flex-col bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
       <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
-        <img
-          src="/frame3.svg"
-          alt="Region Completed Stamp"
-          className="pointer-events-none absolute inset-0 h-full w-full object-contain"
-        />
-        <button
-          onClick={onContinue}
-          className="absolute cursor-pointer bg-transparent"
-          style={{ top: '50%', left: '38.82%', width: '39.65%', height: '14.45%' }}
-          aria-label={allDone ? 'View my summary' : 'Continue to the next destination'}
-        />
-        <button
-          onClick={onFinish}
-          className="absolute cursor-pointer bg-transparent"
-          style={{ top: '68.55%', left: '42.01%', width: '23.75%', height: '4.88%' }}
-          aria-label="Finish my journey"
-        />
+        <div className="ken-burns absolute inset-0">
+          <img
+            src="/frame3.svg"
+            alt="Region Completed Stamp"
+            className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+          />
+          <button
+            onClick={onContinue}
+            className="absolute cursor-pointer bg-transparent"
+            style={{ top: '50%', left: '38.82%', width: '39.65%', height: '14.45%' }}
+            aria-label={allDone ? 'View my summary' : 'Continue to the next destination'}
+          />
+          <button
+            onClick={onFinish}
+            className="absolute cursor-pointer bg-transparent"
+            style={{ top: '68.55%', left: '42.01%', width: '23.75%', height: '4.88%' }}
+            aria-label="Finish my journey"
+          />
+        </div>
       </div>
 
       <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#004C42] lg:hidden">
         <img
           src="/welcome_bg.jpg"
           alt=""
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-35"
+          className="mobile-stamp-art pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
         />
-        <div className="pointer-events-none absolute inset-0 bg-[#004C42]/70" />
+        <div className="pointer-events-none absolute inset-0 overlay-in bg-[#004C42]/70" />
 
         <div className="relative z-10 flex min-h-dvh flex-col">
           <ScreenHeader />
 
           <div className="flex flex-1 flex-col items-center px-5 py-8 text-center text-white">
-            <p className="text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Your passport</p>
+            <p className="q-card-in text-[10px] font-bold uppercase tracking-[.22em] text-white/70">Your passport</p>
 
-            <div className="stamp-pop mt-7 grid h-48 w-48 place-items-center rounded-full border-[5px] border-white bg-white/10 shadow-[0_16px_40px_rgba(0,0,0,.28)]">
+            <div
+              className="stamp-pop mt-7 grid h-48 w-48 place-items-center rounded-full border-[5px] border-white bg-white/10 shadow-[0_16px_40px_rgba(0,0,0,.28)]"
+              style={{ animationDelay: '120ms' }}
+            >
               <div className="grid h-[86%] w-[86%] place-items-center rounded-full border border-dashed border-white/85">
                 <div>
-                  <Check size={40} strokeWidth={3} className="mx-auto" />
+                  <Check size={40} strokeWidth={3} className="check-pop mx-auto" style={{ animationDelay: '420ms' }} />
                   <p className="mt-2 font-display text-lg font-bold tracking-[.16em]">COMPLETED</p>
                 </div>
               </div>
             </div>
 
-            <h1 className="mt-8 font-display text-3xl font-bold uppercase leading-tight tracking-wide">
+            <h1 className="q-card-in mt-8 font-display text-3xl font-bold uppercase leading-tight tracking-wide" style={{ animationDelay: '280ms' }}>
               Congratulations!
             </h1>
-            <p className="mt-2 text-sm text-white/85">You have completed this region.</p>
-            <p className="mt-1 text-xs text-white/70">You get a new stamp in your digital passport.</p>
+            <p className="q-card-in mt-2 text-sm text-white/85" style={{ animationDelay: '360ms' }}>You have completed this region.</p>
+            <p className="q-card-in mt-1 text-xs text-white/70" style={{ animationDelay: '420ms' }}>You get a new stamp in your digital passport.</p>
 
-            <button
-              onClick={onContinue}
-              className="mt-8 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-white text-base font-bold text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)]"
-            >
-              <span>{allDone ? 'View my summary' : 'Continue to the next destination'}</span>
-              <ArrowRight size={18} />
-            </button>
+            <div className="q-card-in mt-8 w-full" style={{ animationDelay: '520ms' }}>
+              <button
+                onClick={onContinue}
+                className="submit-ready inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-white text-base font-bold text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                style={{ animationDelay: '900ms' }}
+              >
+                <span>{allDone ? 'View my summary' : 'Continue to the next destination'}</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
             <button
               onClick={onFinish}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4"
+              className="q-card-in mt-4 inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4"
+              style={{ animationDelay: '600ms' }}
             >
               Finish my journey
             </button>
