@@ -370,7 +370,14 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, number[]>>({});
   const [submitPulse, setSubmitPulse] = useState(false);
   const regionNumber = Math.min(journey.completed.length + 1, regions.length);
-  const progress = (regionNumber / regions.length) * 100;
+  const totalQuestions = shownRegion.questions.length;
+  const answeredCount = shownRegion.questions.reduce(
+    (n, _, i) => n + (existing[i] !== undefined && existing[i] !== null ? 1 : 0),
+    0,
+  );
+  // Current question within this region (Q1 → Q3); fill grows as each is answered
+  const currentQuestion = Math.min(Math.max(answeredCount + 1, 1), totalQuestions);
+  const questionProgress = (currentQuestion / totalQuestions) * 100;
   const regionAnim = leaving ? 'region-out' : 'region-in';
 
   useEffect(() => {
@@ -429,16 +436,27 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           </h1>
         </div>
 
-        {/* Overlay 2: Progress Bar Text Overlay */}
+        {/* Overlay 2: Per-question progress within the current region */}
         <div 
-          className="absolute flex items-center"
-          style={{ top: '21.87%', left: '42.01%', width: '40.97%', height: '4.10%' }}
+          className="absolute overflow-hidden"
+          style={{
+            top: '21.87%',
+            left: '42.01%',
+            width: '40.97%',
+            height: '4.10%',
+            borderRadius: '0.825vw',
+            background: 'rgba(0, 76, 66, 0.3)',
+          }}
         >
           <div 
-            className="absolute top-0 left-0 flex h-full items-center justify-center rounded-full bg-[#004C42] text-[1.65vw] font-bold text-white transition-all duration-700"
-            style={{ width: `${((journey.completed.length + 1) / regions.length) * 100}%` }}
+            className="absolute inset-y-0 left-0 flex items-center justify-center bg-[#004C42] text-[1.65vw] font-bold text-white transition-all duration-500 ease-out"
+            style={{
+              width: `${questionProgress}%`,
+              borderRadius: '0.825vw',
+              minWidth: '3.5vw',
+            }}
           >
-            Q{journey.completed.length + 1}
+            Q{currentQuestion}
           </div>
         </div>
 
@@ -559,12 +577,12 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         </div>
 
         <div className="px-4 pt-4">
-          <div className="relative h-8 w-full overflow-hidden rounded-full bg-[#d8e2de]">
+          <div className="relative h-8 w-full overflow-hidden rounded-full bg-[rgba(0,76,66,0.3)]">
             <div
-              className="absolute inset-y-0 left-0 flex min-w-[3.25rem] items-center rounded-full bg-[#004C42] pl-3 text-[11px] font-bold text-white transition-all duration-700"
-              style={{ width: `${progress}%` }}
+              className="absolute inset-y-0 left-0 flex min-w-[3.25rem] items-center justify-center rounded-full bg-[#004C42] px-3 text-[11px] font-bold text-white transition-all duration-500 ease-out"
+              style={{ width: `${questionProgress}%` }}
             >
-              Q{regionNumber}
+              Q{currentQuestion}
             </div>
           </div>
         </div>
@@ -652,22 +670,23 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap font-bold uppercase text-white"
           style={{
-            top: `${((114.5 - 100) / 1024) * 100}%`,
+            top: `${(114.5 / 1024) * 100}%`,
             left: `${(77 / 1440) * 100}%`,
             fontSize: '6.94vw',
-            lineHeight: 1,
+            lineHeight: '67%',
             letterSpacing: 0,
           }}
         >
           CONGRATULATIONS!
         </div>
 
-        {/* GAME SCORE — Figma: Saudi Regular 400 · 100px · LH 67% · right · uppercase · #FFF */}
+        {/* Shared right edge ≈ 1212 (Figma number box 1025.77 + 186) */}
+        {/* GAME SCORE — y 336.5 · Saudi Regular 400 · 100px · LH 67% · right */}
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
-            top: `${((336.5 - 100) / 1024) * 100}%`,
-            left: `${(888.559 / 1440) * 100}%`,
+            top: `${(336.5 / 1024) * 100}%`,
+            right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '6.94vw',
             lineHeight: '67%',
             letterSpacing: 0,
@@ -678,12 +697,12 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           Game score
         </div>
 
-        {/* Dynamic Game Score — Figma: Saudi Bold 700 · 200px · LH 67% · right · #FFF */}
+        {/* Score value — y 449 · Saudi Bold 700 · 200px · LH 67% · right */}
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
-            top: `${((449 - 200) / 1024) * 100}%`,
-            left: `${(1025.77 / 1440) * 100}%`,
+            top: `${(449 / 1024) * 100}%`,
+            right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '13.89vw',
             lineHeight: '67%',
             letterSpacing: 0,
@@ -694,12 +713,12 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           {animatedScore}
         </div>
 
-        {/* REGIONS COMPLETED — Figma: Saudi Regular 400 · 100px · LH 67% · right · uppercase · #FFF */}
+        {/* REGIONS COMPLETED — y 660.5 · Saudi Regular 400 · 100px · LH 67% · right */}
         <div
           className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
           style={{
-            top: `${((660.5 - 100) / 1024) * 100}%`,
-            left: `${(639.828 / 1440) * 100}%`,
+            top: `${(660.5 / 1024) * 100}%`,
+            right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '6.94vw',
             lineHeight: '67%',
             letterSpacing: 0,
@@ -710,12 +729,12 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           Regions completed
         </div>
 
-        {/* Dynamic Regions — Figma: number Saudi Bold 700 · 200px; /13 Saudi Regular 400 · 100px · LH 67% · right */}
+        {/* Regions value — y 773 · Bold 200px + Regular 100px /13 · right */}
         <div
-          className="font-saudi pointer-events-none absolute flex items-baseline whitespace-nowrap uppercase text-white"
+          className="font-saudi pointer-events-none absolute flex items-baseline justify-end whitespace-nowrap uppercase text-white"
           style={{
-            top: `${((773 - 200) / 1024) * 100}%`,
-            left: `${(1025.77 / 1440) * 100}%`,
+            top: `${(773 / 1024) * 100}%`,
+            right: `${((1440 - 1212) / 1440) * 100}%`,
             fontSize: '13.89vw',
             lineHeight: '67%',
             letterSpacing: 0,
