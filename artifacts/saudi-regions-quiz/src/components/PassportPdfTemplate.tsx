@@ -11,13 +11,12 @@ interface PassportPdfTemplateProps {
 export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplateProps>(
   ({ regions, journey }, ref) => {
     return (
-      <div 
-        ref={ref} 
-        // We position this entirely off-screen so the user never sees it.
-        // We give it a fixed, large dimension to ensure a high quality canvas capture.
-        className="fixed top-0 left-[-9999px] flex flex-col items-center bg-white"
-        style={{ width: '1440px', padding: '40px', gap: '40px' }}
-      >
+      <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', zIndex: -1 }}>
+        <div 
+          ref={ref} 
+          className="flex flex-col items-center bg-white"
+          style={{ width: '1440px', padding: '40px', gap: '40px' }}
+        >
         
         {/* PAGE 1: FRONT COVER (Right half of the cover SVG) */}
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden' }}>
@@ -153,6 +152,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
           </div>
         </div>
 
+      </div>
       </div>
     );
   }
