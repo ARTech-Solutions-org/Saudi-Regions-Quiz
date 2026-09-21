@@ -1,9 +1,9 @@
 <svg width="1440" height="1024" viewBox="0 0 1440 1024" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="Frame 2">
 <g id="Desktop - 2" clip-path="url(#clip0_4_28784)">
-<rect width="1440" height="1024" fill="white"/>
+<rect width="1440" height="1024" fill="none"/>
 <g id="Group 1000002931">
-<rect id="&#217;&#161; 1" x="-187" y="-120" width="1462" height="1269" fill="url(#pattern0_4_28784)"/>
+<rect id="kingdom_tower_bg" x="-187" y="-120" width="1462" height="1269" fill="none"/>
 <rect id="Rectangle 106" x="396" y="-18" width="725" height="1162" fill="url(#paint0_linear_4_28784)"/>
 </g>
 <path id="Rectangle 1" opacity="0.85" d="M361 160H1458V1117L395.641 1099.86L361 160Z" fill="white"/>
