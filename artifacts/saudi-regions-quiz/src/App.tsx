@@ -1280,12 +1280,16 @@ function App() {
 
   const start = async (name: string, email: string, phone: string) => {
     setIsLoadingDB(true);
-    let next = { ...journey, player: { name, email, phone } };
+    
+    // Auto-generate an email if it's missing, so the backend (which requires email as Primary Key) doesn't reject it
+    const resolvedEmail = email || (phone ? `${phone}@guest.local` : `${name.replace(/\s+/g, '').toLowerCase()}_${Date.now()}@guest.local`);
+    
+    let next = { ...journey, player: { name, email: resolvedEmail, phone } };
     
     // Attempt to load from database
-    const backendJourney = await apiLoadJourney(email);
+    const backendJourney = await apiLoadJourney(resolvedEmail);
     if (backendJourney) {
-      next = { ...backendJourney, player: { name, email, phone } };
+      next = { ...backendJourney, player: { name, email: resolvedEmail, phone } };
     }
     
     setJourney(next);
