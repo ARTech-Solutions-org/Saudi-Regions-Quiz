@@ -22,7 +22,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: '-720px', width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-cover.svg"
+              src="/passport-cover.jpg"
               alt="Cover"
               className="absolute inset-0 w-full h-full"
               style={{ maxWidth: 'none' }}
@@ -66,7 +66,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden', backgroundColor: '#F6F4EB' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-page.svg"
+              src="/passport-page.jpg"
               alt="Pages"
               className="absolute inset-0 w-full h-full object-cover"
             />

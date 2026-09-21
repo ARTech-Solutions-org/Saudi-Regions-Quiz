@@ -114,7 +114,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
   const stampsSpread = (
     <div className="w-full h-full transform scale-[1.03] origin-center">
-      <img src="/passport-page.svg" className="absolute inset-0 w-full h-full object-cover" alt="Passport Page" />
+      <img src="/passport-page.jpg" className="absolute inset-0 w-full h-full object-cover" alt="Passport Page" />
 
       {regions.map((region, index) => {
         const coords = regionCoords[region.id];
@@ -206,7 +206,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
                 pointerEvents: 'none',
               }}
             >
-              <img src="/passport-cover.svg" className="w-full h-full object-fill" alt="Passport Cover" />
+              <img src="/passport-cover.jpg" className="w-full h-full object-fill" alt="Passport Cover" />
             </div>
 
             {/* Spine shadow — left edge */}
