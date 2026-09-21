@@ -22,7 +22,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: '-720px', width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-cover.jpg"
+              src="/passport-cover-hq.png"
               alt="Cover"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
@@ -65,7 +65,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden', backgroundColor: '#F6F4EB' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-page.jpg"
+              src="/passport-page-hq.png"
               alt="Pages"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
@@ -104,7 +104,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden', backgroundColor: '#F6F4EB' }}>
           <div style={{ position: 'absolute', top: 0, left: '-720px', width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-page.jpg"
+              src="/passport-page-hq.png"
               alt="Pages"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
@@ -143,7 +143,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-cover.jpg"
+              src="/passport-cover-hq.png"
               alt="Cover"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
