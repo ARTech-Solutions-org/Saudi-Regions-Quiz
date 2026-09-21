@@ -561,7 +561,7 @@ function ScreenHeader() {
   );
 }
 
-function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport }: { region: Region; journey: SavedJourney; onComplete: (regionId: string, timeSpentSeconds: number) => void; onAnswer: (regionId: string, questionIndex: number, answer: number) => void; onFinish: () => void; onViewPassport: () => void }) {
+function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport }: { region: Region; journey: SavedJourney; onComplete: (regionId: string, timeSpentSeconds: number) => void; onAnswer: (regionId: string, questionIndex: number, answer: number) => void; onFinish: (timeSpentSeconds?: number) => void; onViewPassport: () => void }) {
   const [shownRegion, setShownRegion] = useState(region);
   const [leaving, setLeaving] = useState(false);
   const existing = journey.answers[shownRegion.id] ?? [];
@@ -774,7 +774,10 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
         {/* Finish Journey Button Overlay */}
         <button
-          onClick={onFinish}
+          onClick={() => {
+            const elapsedSecs = Math.floor((Date.now() - mountTimeRef.current) / 1000);
+            onFinish(elapsedSecs);
+          }}
           className="font-saudi absolute flex items-center justify-center bg-transparent text-[2.08vw] font-normal tracking-normal text-[#004C42] shadow-none transition-all hover:opacity-70 focus:outline-none"
           style={{ top: '82.81%', left: '72.91%', width: '13.05%', height: '7.03%' }}
         >
@@ -897,7 +900,10 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
             {journey.completed.length + 1 >= regions.length ? 'Finish Quiz' : 'Submit answers'}
           </button>
           <button
-            onClick={onFinish}
+            onClick={() => {
+              const elapsedSecs = Math.floor((Date.now() - mountTimeRef.current) / 1000);
+              onFinish(elapsedSecs);
+            }}
             className="font-saudi inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#004C42]/40 bg-white/85 text-[16px] font-normal text-[#004C42]"
           >
             Finish my journey
@@ -1328,6 +1334,20 @@ function App() {
     setScreen('stamp');
   };
 
+  const handleFinish = (timeSpentSeconds?: number) => {
+    if (timeSpentSeconds && timeSpentSeconds > 0) {
+      setJourney((prev) => {
+        const nextTimeTaken = (prev.timeTaken || 0) + timeSpentSeconds;
+        const next = { ...prev, timeTaken: nextTimeTaken };
+        if (next.player) {
+          apiSaveJourney(next.player.email, next.player.name, next);
+        }
+        return next;
+      });
+    }
+    setScreen('summary');
+  };
+
   const restart = () => { 
     if (window.confirm('Start a new passport journey? Your progress will be cleared.')) { 
       localStorage.removeItem(STORAGE_KEY); 
@@ -1351,12 +1371,12 @@ function App() {
         </div>
       )}
       {screen === 'welcome' && <Welcome journey={journey} onStart={start} />}
-      {screen === 'quiz' && activeRegion && <Quiz region={activeRegion} journey={journey} onComplete={completeRegion} onAnswer={answer} onFinish={() => setScreen('summary')} onViewPassport={() => setShowPassport(true)} />}
+      {screen === 'quiz' && activeRegion && <Quiz region={activeRegion} journey={journey} onComplete={completeRegion} onAnswer={answer} onFinish={handleFinish} onViewPassport={() => setShowPassport(true)} />}
       {screen === 'stamp' && (
         <StampScreen
           allDone={journey.completed.length >= regions.length}
           onContinue={() => setScreen(journey.completed.length >= regions.length ? 'summary' : 'quiz')}
-          onFinish={() => setScreen('summary')}
+          onFinish={() => handleFinish()}
         />
       )}
       {screen === 'summary' && <Summary journey={journey} onRestart={restart} onViewPassport={() => setShowPassport(true)} />}
