@@ -25,7 +25,7 @@ export type SavedJourney = {
 };
 
 const blankJourney: SavedJourney = {
-  player: null, completed: [], answers: {}, score: 0, currentRegion: null, currentQuestion: 0,
+  player: null, completed: [], answers: {}, score: 0, timeTaken: 0, currentRegion: null, currentQuestion: 0,
 };
 
 function useCountUp(target: number, duration = 900) {
