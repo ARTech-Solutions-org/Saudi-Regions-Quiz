@@ -37,13 +37,13 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [page, setPage] = useState(0); // 0 = Cover, 1 = Intro, 2 = Stamps
-  const [flipping, setFlipping] = useState<'forward'|'backward'|null>(null);
+  const [flipping, setFlipping] = useState<'forward' | 'backward' | null>(null);
 
   const [coverSvg, setCoverSvg] = useState<string>('');
   const [pageSvg, setPageSvg] = useState<string>('');
   const [introSvg, setIntroSvg] = useState<string>('');
 
-  const turnPage = (direction: 'forward'|'backward') => {
+  const turnPage = (direction: 'forward' | 'backward') => {
     if (flipping) return;
     setFlipping(direction);
     setTimeout(() => {
@@ -67,7 +67,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
       for (let i = 0; i < pages.length; i++) {
         const pageEl = pages[i];
-        
+
         const canvas = await html2canvas(pageEl, {
           scale: 2,
           useCORS: true,
@@ -78,11 +78,11 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
         });
 
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        
+
         if (i > 0) {
           pdf.addPage([720, 1024], 'portrait');
         }
-        
+
         pdf.addImage(imgData, 'JPEG', 0, 0, 720, 1024);
       }
 
@@ -119,24 +119,23 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       {regions.map((region, index) => {
         const coords = regionCoords[region.id];
         if (!coords) return null;
-        
+
         const isCompleted = journey.completed.includes(region.id);
 
         return (
-          <div 
+          <div
             key={region.id}
             className="absolute flex flex-col items-center justify-center z-20"
-            style={{ 
-              top: coords.top, 
+            style={{
+              top: coords.top,
               left: coords.left,
               transform: 'translate(-50%, -50%)',
               width: '10%',
             }}
           >
             <div
-              className={`relative w-full aspect-square rounded-full border-[3px] border-dashed flex items-center justify-center transition-all duration-500 ${
-                isCompleted ? 'border-[#DDB572] bg-[#DDB572]/20' : 'border-gray-300 bg-gray-50/50'
-              } ${isCompleted ? 'stamp-pop' : ''}`}
+              className={`relative w-full aspect-square rounded-full border-[3px] border-dashed flex items-center justify-center transition-all duration-500 ${isCompleted ? 'border-[#DDB572] bg-[#DDB572]/20' : 'border-gray-300 bg-gray-50/50'
+                } ${isCompleted ? 'stamp-pop' : ''}`}
               style={{ animationDelay: `${index * 55}ms` }}
             >
               {isCompleted ? (
@@ -160,7 +159,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   return (
     <div className="overlay-in fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       {/* Close Button */}
-      <button 
+      <button
         onClick={onClose}
         className="absolute top-6 right-6 text-white text-4xl hover:scale-110 transition-transform z-50"
       >
@@ -169,20 +168,18 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
       {/* Ambient light glow behind passport */}
       <div
-        className={`absolute transition-all duration-700 pointer-events-none rounded-full blur-3xl opacity-30 ${
-          isOpen
+        className={`absolute transition-all duration-700 pointer-events-none rounded-full blur-3xl opacity-30 ${isOpen
             ? 'w-[80vw] max-w-5xl h-48 bg-amber-600/40 bottom-1/3'
             : 'w-64 h-96 bg-emerald-800/50'
-        }`}
+          }`}
       />
 
       {/* Passport Book Container */}
-      <div 
-        className={`relative transition-all duration-700 ease-in-out ${
-          isOpen
+      <div
+        className={`relative transition-all duration-700 ease-in-out ${isOpen
             ? 'w-[90%] sm:w-[80%] md:w-[70%] max-w-3xl aspect-[1440/1024]'
             : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'
-        }`}
+          }`}
         style={{
           filter: isOpen
             ? 'drop-shadow(0 40px 60px rgba(0,0,0,0.7)) drop-shadow(0 10px 20px rgba(0,0,0,0.5))'
@@ -206,7 +203,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
                 pointerEvents: 'none',
               }}
             >
-              <img src="/passport-cover.jpg" className="w-full h-full object-fill" alt="Passport Cover" />
+              <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Passport Cover" />
             </div>
 
             {/* Spine shadow — left edge */}
@@ -237,13 +234,13 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
           <div className="relative w-full h-full rounded-xl overflow-hidden bg-[#F6F4EB]">
             {/* Page turning areas */}
             {page > 1 && !flipping && (
-              <div 
+              <div
                 className="absolute inset-y-0 left-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors"
                 onClick={() => turnPage('backward')}
               />
             )}
             {page === 1 && !flipping && (
-              <div 
+              <div
                 className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors"
                 onClick={() => turnPage('forward')}
               />
@@ -341,14 +338,14 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
           >
             {journey.completed.length < regions.length ? (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
                 Return to Questions
               </>
             ) : (
               'Close Passport'
             )}
           </button>
-          
+
           <button
             onClick={generatePDF}
             disabled={isGeneratingPdf}
@@ -356,17 +353,17 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
           >
             {isGeneratingPdf ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
                 Generating PDF...
               </span>
             ) : (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
                 Download PDF
               </>
             )}
           </button>
-          
+
           {onRestart && (
             <div className="w-full mt-2 flex justify-center">
               <button
@@ -377,7 +374,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
                 }}
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white px-6 py-2 text-sm font-bold text-[#004C42] shadow-sm transition-all duration-300 hover:bg-[#004C42]/10 sm:text-base border border-[#004C42]"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
                 Start Over
               </button>
             </div>
