@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Compass, LockKeyhole, Map, RotateCcw, Sparkles, Trophy } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -26,6 +26,107 @@ export type SavedJourney = {
 const blankJourney: SavedJourney = {
   player: null, completed: [], answers: {}, score: 0, currentRegion: null, currentQuestion: 0,
 };
+
+function useCountUp(target: number, duration = 900) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || target === 0) {
+      setValue(target);
+      return;
+    }
+    let start: number | null = null;
+    let raf = 0;
+    const step = (ts: number) => {
+      if (start === null) start = ts;
+      const p = Math.min(1, (ts - start) / duration);
+      setValue(Math.round(target * p));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return value;
+}
+
+/** Shrinks text to fit its parent; keeps Figma size when content is short. */
+function AutoFitText({
+  text,
+  maxSize,
+  minSize,
+  lineHeight,
+  className,
+}: {
+  text: string;
+  maxSize: string;
+  minSize: string;
+  lineHeight?: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+
+    const parseSize = (value: string) => {
+      const num = parseFloat(value);
+      if (value.endsWith('vw')) return (num / 100) * window.innerWidth;
+      if (value.endsWith('vh')) return (num / 100) * window.innerHeight;
+      return num;
+    };
+
+    const fit = () => {
+      const maxPx = parseSize(maxSize);
+      const minPx = parseSize(minSize);
+      let size = maxPx;
+      el.style.fontSize = `${size}px`;
+      if (lineHeight) el.style.lineHeight = lineHeight;
+
+      // Allow wrapping; shrink until both axes fit (with a small tolerance)
+      let guard = 40;
+      while (
+        guard-- > 0 &&
+        size > minPx &&
+        (el.scrollWidth > parent.clientWidth + 1 || el.scrollHeight > parent.clientHeight + 1)
+      ) {
+        size = Math.max(minPx, size - 0.5);
+        el.style.fontSize = `${size}px`;
+      }
+    };
+
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(parent);
+    window.addEventListener('resize', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+    };
+  }, [text, maxSize, minSize, lineHeight]);
+
+  return (
+    <span
+      ref={ref}
+      className={className}
+      style={{
+        display: 'block',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        overflow: 'hidden',
+        fontSize: maxSize,
+        lineHeight: lineHeight ?? 1.1865,
+        letterSpacing: 0,
+        textAlign: 'center',
+        overflowWrap: 'anywhere',
+        wordBreak: 'break-word',
+      }}
+    >
+      {text}
+    </span>
+  );
+}
 
 function loadJourney(): SavedJourney {
   try {
@@ -128,15 +229,17 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
 
       {/* Main Hero / Landscape Section - background starts immediately after navbar */}
       {/* Main Hero / Landscape Section - background dictates height using CSS Grid */}
-      <main className="relative z-10 flex-1 w-full grid bg-[#ebeae4]">
+      <main className="relative z-10 flex-1 w-full grid overflow-hidden bg-[#ebeae4]">
         {/* Background photo starting right after navbar */}
         <img
           src="/welcome_bg.jpg"
           alt="Saudi Regions Quiz"
           className="col-start-1 row-start-1 w-full h-auto object-cover pointer-events-none z-0"
           style={{
-            objectPosition: 'center top',
+            objectPosition: 'center 16%',
             minHeight: 'calc(100dvh - 80px)',
+            transform: 'scale(1.07) translateY(-2%)',
+            transformOrigin: 'center center',
           }}
         />
         {/* Subtle responsive vignette for contrast */}
@@ -167,28 +270,36 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
               }}
             />
 
-            {/* The White Journey Card */}
+            {/* The White Journey Card — sizes matched to Figma card proportions */}
             <div
-              className="relative z-[2] w-full bg-white rounded-[24px] sm:rounded-[34px] p-5 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.28)] border border-white/70 box-border"
+              className="relative z-[2] w-full box-border rounded-[32px] border border-white/70 bg-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.28)] sm:rounded-[40px] sm:p-10 lg:p-11"
             >
-              {/* Headline */}
+              {/* Headline — Figma: Saudi Bold 700, 68.88px, line-height 67%, tracking 0, #004C42 */}
               <h1
-                className="text-[21px] sm:text-[28px] lg:text-[32px] font-black text-[#004C42] tracking-tight leading-tight uppercase font-display mb-1.5 sm:mb-2"
+                className="font-saudi mb-2 text-[36px] font-bold uppercase tracking-normal text-[#004C42] sm:text-[48px] lg:text-[68.88px]"
                 data-testid="text-welcome-title"
+                style={{ lineHeight: '67%' }}
               >
                 YOUR JOURNEY
                 <br />
                 STARTS HERE
               </h1>
 
-              {/* Subheading */}
-              <p className="text-xs sm:text-sm lg:text-[15px] text-[#767676] font-normal leading-relaxed mb-4 sm:mb-7">
+              {/* Subheading — Figma: Saudi-MoD Medium 500, 17.23px, LH 140%, #767676 */}
+              <p
+                className="font-mod mb-7 tracking-normal text-[15px] sm:text-[17.23px]"
+                style={{
+                  fontWeight: 500,
+                  lineHeight: '140%',
+                  color: '#767676',
+                }}
+              >
                 One passport. A journey across Saudi Arabia.
               </p>
 
               {/* Interactive Form */}
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4" noValidate>
-                {/* Full Name Input */}
+              <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4" noValidate>
+                {/* Full Name Input — Figma: Saudi-MoD 300, 22px, LH 140%, #000000 */}
                 <div>
                   <input
                     id="welcome-name"
@@ -198,8 +309,12 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your full name"
                     data-testid="input-player-name"
                     aria-label="Enter your full name"
-                    className="w-full h-11 sm:h-14 px-4 sm:px-6 rounded-full text-sm sm:text-base text-gray-900 placeholder:text-gray-400 outline-none transition-all duration-200 box-border"
+                    className="font-mod box-border h-14 w-full rounded-full px-5 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px] sm:px-6 sm:text-[22px]"
                     style={{
+                      fontWeight: 300,
+                      lineHeight: '140%',
+                      color: '#000000',
+                      letterSpacing: 0,
                       border: touched && name.trim().length <= 1 ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
                       backgroundColor: '#ffffff',
                     }}
@@ -214,7 +329,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
-                {/* Email Address Input */}
+                {/* Email Input — same Figma type as name field */}
                 <div>
                   <input
                     id="welcome-email"
@@ -224,8 +339,12 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     placeholder="Enter your email address"
                     data-testid="input-player-email"
                     aria-label="Enter your email address"
-                    className="w-full h-11 sm:h-14 px-4 sm:px-6 rounded-full text-sm sm:text-base text-gray-900 placeholder:text-gray-400 outline-none transition-all duration-200 box-border"
+                    className="font-mod box-border h-14 w-full rounded-full px-5 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px] sm:px-6 sm:text-[22px]"
                     style={{
+                      fontWeight: 300,
+                      lineHeight: '140%',
+                      color: '#000000',
+                      letterSpacing: 0,
                       border: touched && !email.includes('@') ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
                       backgroundColor: '#ffffff',
                     }}
@@ -240,13 +359,15 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
-                {/* Submit Button */}
-                <div className="pt-1.5 sm:pt-2">
+                {/* Submit — Figma: Saudi Regular 400, 32.3px, LH 140%, #FFFFFF, center */}
+                <div className="pt-1">
                   <button
                     type="submit"
                     data-testid="button-start-journey"
-                    className="w-full h-11 sm:h-14 rounded-full text-white font-bold text-sm sm:text-base tracking-wide flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                    className="font-saudi flex h-14 w-full cursor-pointer items-center justify-center rounded-full text-center text-[22px] tracking-normal text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 sm:h-[60px] sm:text-[28px] lg:text-[32.3px]"
                     style={{
+                      fontWeight: 400,
+                      lineHeight: '140%',
                       backgroundColor: '#004C42',
                     }}
                     onMouseEnter={(e) => {
@@ -262,7 +383,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
               </form>
 
               {/* Footnote */}
-              <p className="text-[10px] sm:text-xs text-[#767676] font-normal leading-normal text-center mt-3.5 sm:mt-6">
+              <p className="font-saudi mt-5 text-center text-[11px] font-normal leading-normal text-[#767676] sm:mt-6 sm:text-[13px]">
                 Your name and email link your score, progress and stamps.
               </p>
             </div>
@@ -297,26 +418,76 @@ function Stamp({ region, complete, index, big = false }: { region: Region; compl
   );
 }
 
-// RegionSelect has been removed per user request, regions now flow sequentially.
-
-// RegionSelect has been removed per user request, regions now flow sequentially.
+function ScreenHeader() {
+  return (
+    <header className="w-full bg-white relative z-20 shrink-0 border-b border-gray-100 flex items-center justify-between px-4 sm:px-8 py-2.5 sm:py-4">
+      <img
+        src="/lilly_logo.svg"
+        alt="Lilly - A Medicine Company"
+        className="h-6 sm:h-9 w-auto object-contain"
+        style={{ maxHeight: '36px', maxWidth: '110px' }}
+      />
+      <img
+        src="/national_day_logo.svg"
+        alt="اليوم الوطني السعودي - عزنا بطبعنا"
+        className="h-6 sm:h-9 w-auto object-contain"
+        style={{ maxHeight: '36px', maxWidth: '210px' }}
+      />
+    </header>
+  );
+}
 
 function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport }: { region: Region; journey: SavedJourney; onComplete: (regionId: string) => void; onAnswer: (regionId: string, questionIndex: number, answer: number) => void; onFinish: () => void; onViewPassport: () => void }) {
-  const existing = journey.answers[region.id] ?? [];
-  const allAnswered = region.questions.every((_, idx) => existing[idx] !== undefined);
+  const [shownRegion, setShownRegion] = useState(region);
+  const [leaving, setLeaving] = useState(false);
+  const existing = journey.answers[shownRegion.id] ?? [];
+  const allAnswered = shownRegion.questions.every((_, idx) => existing[idx] !== undefined);
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, number[]>>({});
+  const [submitPulse, setSubmitPulse] = useState(false);
+  const regionNumber = Math.min(journey.completed.length + 1, regions.length);
+  const totalQuestions = shownRegion.questions.length;
+  const answeredCount = shownRegion.questions.reduce(
+    (n, _, i) => n + (existing[i] !== undefined && existing[i] !== null ? 1 : 0),
+    0,
+  );
+  // Starts empty; fills 1/3 → 2/3 → 3/3 as each question is answered
+  const questionProgress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  const regionAnim = leaving ? 'region-out' : 'region-in';
 
-  // Reset wrong attempts when region changes
   useEffect(() => {
-    setWrongAttempts({});
-  }, [region.id]);
+    if (region.id === shownRegion.id) return;
+    setLeaving(true);
+    const t = window.setTimeout(() => {
+      setShownRegion(region);
+      setLeaving(false);
+      setWrongAttempts({});
+      setSubmitPulse(false);
+    }, 280);
+    return () => window.clearTimeout(t);
+  }, [region, shownRegion.id]);
+
+  useEffect(() => {
+    if (allAnswered) setSubmitPulse(true);
+  }, [allAnswered]);
+
+  const pickOption = (qIndex: number, oIndex: number, answered: boolean, isWrong: boolean) => {
+    if (leaving || answered || isWrong) return;
+    if (oIndex === shownRegion.questions[qIndex].answer) {
+      onAnswer(shownRegion.id, qIndex, oIndex);
+    } else {
+      setWrongAttempts((prev) => ({
+        ...prev,
+        [qIndex]: [...(prev[qIndex] || []), oIndex],
+      }));
+    }
+  };
 
   return (
-    <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
+    <div className="screen-in flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
 
-      
-      {/* The main scalable container that matches the SVG's 1440x1024 viewBox */}
-      <div className="relative w-full aspect-[1440/1024] bg-white overflow-hidden">
+      {/* Desktop Figma frame — readable from ~1024px up */}
+      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-white lg:block">
+        <div className="ken-burns absolute inset-0">
         
         {/* The SVG Background (No Text). Using it precisely as the layout! */}
         <img 
@@ -325,31 +496,50 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           className="absolute inset-0 w-full h-full object-contain pointer-events-none" 
         />
         
-        {/* Overlay 1: Top Banner (Text Only) */}
+        {/* Overlay 1: Region title — Figma: Saudi Bold 700, 100px, LH 55px, #FFFFFF, uppercase */}
         <div 
-          className="absolute flex items-center justify-start pl-[5%]"
-          style={{ top: '0%', left: '0%', width: '45%', height: '18%' }}
+          className="absolute"
+          style={{ top: `${((114.5 - 100) / 1024) * 100}%`, left: `${(77 / 1440) * 100}%` }}
         >
-          <h1 className="text-white text-[4.5vw] xl:text-[75px] font-bold uppercase tracking-widest leading-none mt-[-2%]">
-            {region.name} REGION
+          <h1
+            key={shownRegion.id}
+            className={`${regionAnim} font-saudi uppercase tracking-normal text-white`}
+            style={{ fontSize: '6.94vw', fontWeight: 700, lineHeight: '3.82vw', letterSpacing: 0 }}
+          >
+            {shownRegion.name} REGION
           </h1>
         </div>
 
-        {/* Overlay 2: Progress Bar Text Overlay */}
+        {/* Overlay 2: Flat progress track + fill + Qn (no SVG art) */}
         <div 
-          className="absolute flex items-center"
-          style={{ top: '21.87%', left: '42.01%', width: '40.97%', height: '4.10%' }}
+          className="absolute overflow-hidden"
+          style={{
+            top: `${(224 / 1024) * 100}%`,
+            left: `${(605 / 1440) * 100}%`,
+            width: `${(630 / 1440) * 100}%`,
+            height: `${(43 / 1024) * 100}%`,
+            borderRadius: `${(21.5 / 1440) * 100}vw`,
+            backgroundColor: '#B8CDC8',
+          }}
         >
           <div 
-            className="absolute top-0 left-0 h-full bg-[#004C42] rounded-full flex items-center pl-4 text-white text-[1.5vw] xl:text-[24px] font-bold transition-all duration-700"
-            style={{ width: `${((journey.completed.length + 1) / regions.length) * 100}%` }}
+            className="font-saudi absolute inset-y-0 left-0 flex items-center justify-center text-white transition-all duration-500 ease-out"
+            style={{
+              width: `${questionProgress}%`,
+              minWidth: answeredCount > 0 ? '3.5vw' : 0,
+              opacity: answeredCount > 0 ? 1 : 0,
+              borderRadius: `${(21.5 / 1440) * 100}vw`,
+              backgroundColor: '#004C42',
+              fontSize: '1.65vw',
+              fontWeight: 700,
+            }}
           >
-            Q{journey.completed.length + 1}
+            {answeredCount > 0 ? `Q${answeredCount}` : null}
           </div>
         </div>
 
         {/* Overlay 3: The 3 Questions */}
-        {region.questions.map((question, qIndex) => {
+        {shownRegion.questions.map((question, qIndex) => {
           // Exact top percentages from the SVG rects
           const topPer = [29.29, 46.14, 62.93][qIndex];
           const selected = existing[qIndex];
@@ -358,50 +548,66 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
           return (
             <div key={qIndex}>
-              {/* Question Box (Transparent bg, SVG draws the white box) */}
+              {/* Question — Figma: Saudi Bold 700, 35px, LH 30px, #004C42 */}
               <div 
-                className="absolute flex items-center px-[3%]"
+                className="absolute flex items-center overflow-hidden pl-[7.3%] pr-[4%]"
                 style={{ top: `${topPer}%`, left: '42.01%', width: '29.09%', height: '13.76%' }}
               >
-                <p className="text-[#004C42] font-bold text-[1.8vw] xl:text-[28px] leading-snug">{question.prompt}</p>
+                <div
+                  className={`${leaving ? 'q-card-out' : 'q-card-in'} flex h-full w-full items-center`}
+                  style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
+                >
+                  <p
+                    className="font-saudi tracking-normal text-[#004C42]"
+                    style={{ fontSize: '2.43vw', fontWeight: 700, lineHeight: '2.08vw', letterSpacing: 0 }}
+                  >
+                    {question.prompt}
+                  </p>
+                </div>
               </div>
 
-              {/* Options Box Overlay */}
+              {/* Answers — Figma: Saudi-MoD SemiBold 600, 20px, LH 23.73px, center, #2D2D2D @ 50% */}
               <div 
-                className="absolute flex flex-col justify-between"
+                className="absolute overflow-hidden"
                 style={{ top: `${topPer - 0.06}%`, left: '72.45%', width: '13.35%', height: '13.9%' }}
               >
-                {question.options.map((option, oIndex) => {
+                <div
+                  className={`${leaving ? 'q-card-out' : 'q-card-in'} flex h-full w-full flex-col justify-between`}
+                  style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90 + 40}ms` }}
+                >
+                  {question.options.map((option, oIndex) => {
                   const isAnswer = answered && oIndex === question.answer;
                   const isWrong = wrongs.includes(oIndex);
 
-                  let btnClass = "bg-transparent border-none text-[#004C42] hover:bg-[#004C42]/5";
-                  if (isAnswer) btnClass = "bg-[#004C42] text-white shadow-sm";
-                  else if (isWrong) btnClass = "bg-[#ffe5e5] text-[#d9383a]"; // Opaque light red
+                  let btnClass = "bg-transparent border-none text-[#2D2D2D]";
+                  if (isAnswer) btnClass = "bg-[#004C42] text-white shadow-sm answer-correct";
+                  else if (isWrong) btnClass = "bg-[#ffe5e5] text-[#d9383a] answer-wrong";
 
                   return (
                     <button
                       key={oIndex}
-                      onClick={() => {
-                        if (answered || isWrong) return;
-                        if (oIndex === question.answer) {
-                          onAnswer(region.id, qIndex, oIndex);
-                        } else {
-                          setWrongAttempts(prev => ({
-                            ...prev,
-                            [qIndex]: [...(prev[qIndex] || []), oIndex]
-                          }));
-                        }
+                      onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
+                      disabled={leaving || answered || isWrong}
+                      className={`font-mod relative flex h-[46.5%] w-full items-center justify-center px-[8%] text-center tracking-normal transition-all duration-200 ${btnClass} focus:outline-none`}
+                      style={{
+                        borderRadius: '0.6vw',
+                        fontWeight: 600,
+                        letterSpacing: 0,
                       }}
-                      disabled={answered || isWrong}
-                      className={`w-full h-[46.5%] text-[1.2vw] xl:text-[20px] font-semibold transition-all ${btnClass} flex items-center justify-between px-[6%] focus:outline-none`}
-                      style={{ borderRadius: '0.6vw' }}
                     >
-                      <span className="truncate pr-1">{option}</span>
-                      {isAnswer && <Check size={20} strokeWidth={4} className="text-white flex-shrink-0" />}
+                      <span className="flex h-full w-full items-center justify-center overflow-hidden py-[4%]">
+                        <AutoFitText
+                          text={option}
+                          maxSize="1.3889vw"
+                          minSize="0.75vw"
+                          lineHeight="1.1865"
+                        />
+                      </span>
+                      {isAnswer && <Check size={16} strokeWidth={4} className="check-pop pointer-events-none absolute right-[6%] text-white" />}
                     </button>
                   );
                 })}
+                </div>
               </div>
             </div>
           );
@@ -410,10 +616,10 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         {/* Overlay 4: Bottom Action Buttons */}
         {/* Submit Button Overlay */}
         <button 
-          onClick={() => allAnswered && onComplete(region.id)}
-          disabled={!allAnswered}
-          className={`absolute bg-transparent flex items-center justify-center font-bold text-[2.2vw] xl:text-[36px] transition-all focus:outline-none ${
-            allAnswered ? 'text-white hover:opacity-80' : 'text-white/50 cursor-not-allowed'
+          onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
+          disabled={!allAnswered || leaving}
+          className={`font-saudi absolute flex items-center justify-center text-[2.64vw] font-normal tracking-normal transition-all focus:outline-none ${
+            allAnswered ? `text-white hover:opacity-80 ${submitPulse ? 'submit-ready-text' : ''}` : 'cursor-not-allowed text-white/50'
           }`}
           style={{ top: '82.81%', left: '42.01%', width: '29.44%', height: '7.03%' }}
         >
@@ -423,12 +629,124 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         {/* Finish Journey Button Overlay */}
         <button
           onClick={onFinish}
-          className="absolute bg-transparent border-none shadow-none flex items-center justify-center font-bold text-[#004C42] text-[1.6vw] xl:text-[26px] hover:opacity-70 transition-all focus:outline-none"
+          className="font-saudi absolute flex items-center justify-center bg-transparent text-[2.08vw] font-normal tracking-normal text-[#004C42] shadow-none transition-all hover:opacity-70 focus:outline-none"
           style={{ top: '82.81%', left: '72.91%', width: '13.05%', height: '7.03%' }}
         >
           Finish my journey
         </button>
+        </div>
 
+      </div>
+
+      {/* Mobile / tablet stacked layout */}
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#ebeae4] lg:hidden">
+        <img
+          src="/frame2_no_text.svg"
+          alt=""
+          className="mobile-quiz-art pointer-events-none absolute inset-0 h-full w-full object-cover object-left-top"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-white/30" />
+
+        <div className="relative z-10 flex min-h-dvh flex-col">
+        <ScreenHeader />
+
+        <div className="bg-[#004C42] px-4 py-4 text-white">
+          <p className="font-mod text-[11px] font-medium uppercase tracking-[.18em] text-white/70">
+            Region {regionNumber} of {regions.length}
+          </p>
+          <h1
+            key={shownRegion.id}
+            className={`${regionAnim} font-saudi mt-1 text-[28px] font-bold uppercase tracking-normal sm:text-[32px]`}
+            style={{ lineHeight: 1.05 }}
+          >
+            {shownRegion.name} Region
+          </h1>
+        </div>
+
+        <div className="px-4 pt-4">
+          <div className="relative h-8 w-full overflow-hidden rounded-full" style={{ backgroundColor: '#B8CDC8' }}>
+            <div
+              className="font-saudi absolute inset-y-0 left-0 flex items-center justify-center rounded-full text-[12px] font-bold text-white transition-all duration-500 ease-out"
+              style={{
+                width: `${questionProgress}%`,
+                minWidth: answeredCount > 0 ? '3.25rem' : 0,
+                opacity: answeredCount > 0 ? 1 : 0,
+                paddingInline: answeredCount > 0 ? '0.75rem' : 0,
+                backgroundColor: '#004C42',
+              }}
+            >
+              {answeredCount > 0 ? `Q${answeredCount}` : null}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col gap-4 px-4 py-5 pb-8">
+          {shownRegion.questions.map((question, qIndex) => {
+            const selected = existing[qIndex];
+            const answered = selected !== undefined && selected !== null;
+            const wrongs = wrongAttempts[qIndex] || [];
+
+            return (
+              <section
+                key={`${shownRegion.id}-${qIndex}`}
+                className={`${leaving ? 'q-card-out' : 'q-card-in'} rounded-[22px] border border-white/70 bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)]`}
+                style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
+              >
+                <p className="font-mod mb-2 text-[11px] font-medium uppercase tracking-[.14em] text-[#668078]">
+                  Question {qIndex + 1}
+                </p>
+                <p
+                  className="font-saudi mb-4 tracking-normal text-[#004C42]"
+                  style={{ fontSize: '18px', fontWeight: 700, lineHeight: '22px', letterSpacing: 0 }}
+                >
+                  {question.prompt}
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  {question.options.map((option, oIndex) => {
+                    const isAnswer = answered && oIndex === question.answer;
+                    const isWrong = wrongs.includes(oIndex);
+
+                    return (
+                      <button
+                        key={oIndex}
+                        onClick={() => pickOption(qIndex, oIndex, answered, isWrong)}
+                        disabled={leaving || answered || isWrong}
+                        className={`font-mod flex min-h-12 w-full items-center justify-center rounded-[12px] border px-4 py-3 text-center transition-all active:scale-[0.98] disabled:cursor-not-allowed ${isAnswer ? 'answer-correct' : ''} ${isWrong ? 'answer-wrong' : ''}`}
+                        style={{
+                          fontWeight: 600,
+                          letterSpacing: 0,
+                          background: isAnswer ? '#004C42' : isWrong ? '#ffe5e5' : '#ffffff',
+                          color: isAnswer ? '#ffffff' : isWrong ? '#d9383a' : '#2D2D2D',
+                          borderColor: isAnswer ? '#004C42' : isWrong ? '#f3b4b4' : '#c8d0cc',
+                        }}
+                      >
+                        <span className="min-w-0 flex-1 overflow-hidden pr-2">
+                          <AutoFitText text={option} maxSize="20px" minSize="12px" lineHeight="1.1865" />
+                        </span>
+                        {isAnswer && <Check size={18} strokeWidth={3} className="check-pop shrink-0 text-white" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+
+          <button
+            onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
+            disabled={!allAnswered || leaving}
+            className={`font-saudi mt-2 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#004C42] text-[18px] font-normal text-white shadow-[0_8px_20px_rgba(0,89,77,.16)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 ${allAnswered && submitPulse ? 'submit-ready' : ''}`}
+          >
+            {journey.completed.length + 1 >= regions.length ? 'Finish Quiz' : 'Submit answers'}
+          </button>
+          <button
+            onClick={onFinish}
+            className="font-saudi inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#004C42]/40 bg-white/85 text-[16px] font-normal text-[#004C42]"
+          >
+            Finish my journey
+          </button>
+        </div>
+        </div>
       </div>
     </div>
   );
@@ -436,78 +754,101 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
 function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney; onRestart: () => void; onViewPassport: () => void }) {
   const completedRegions = regions.filter((region) => journey.completed.includes(region.id));
+  const animatedScore = useCountUp(journey.score);
+  const animatedRegions = useCountUp(completedRegions.length);
   
   return (
-    <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
-      <div className="relative w-full aspect-[1440/1024] bg-[#F2F2F2] overflow-hidden">
+    <div className="screen-in flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
+      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
         <img 
           src="/frame4.svg" 
           alt="Final Score Summary" 
           className="absolute inset-0 w-full h-full object-contain pointer-events-none" 
         />
-        
-        {/* CONGRATULATIONS! Title (X: 77, Y: 62) */}
-        <div 
-          className="absolute flex items-center justify-start font-display font-bold text-white uppercase tracking-wider"
-          style={{ 
-            top: '6.05%', 
-            left: '5.35%', 
-            width: '30%', 
-            height: '5.37%', 
-            fontSize: '4vw',
-            lineHeight: 0.55
+
+        {/* CONGRATULATIONS! — Figma: Saudi Bold 100px, x 77 y 114.5 */}
+        <div
+          className="font-saudi pointer-events-none absolute whitespace-nowrap font-bold uppercase text-white"
+          style={{
+            top: `${(114.5 / 1024) * 100}%`,
+            left: `${(77 / 1440) * 100}%`,
+            fontSize: '6.94vw',
+            lineHeight: '67%',
+            letterSpacing: 0,
           }}
         >
           CONGRATULATIONS!
         </div>
 
-        {/* GAME SCORE Title (Estimated above Score) */}
-        <div 
-          className="absolute flex items-end justify-center font-display text-white tracking-[0.2em]"
-          style={{ top: '24%', left: '55%', width: '40%', height: '6%', fontSize: '3vw' }}
-        >
-          GAME SCORE
-        </div>
-
-        {/* Dynamic Game Score (X: 1025, Y: 332) */}
-        <div 
-          className="absolute flex items-center justify-center font-display font-bold text-white"
-          style={{ 
-            top: '32.42%', 
-            left: '71.18%', 
-            width: '16.74%', 
-            height: '13.09%', 
-            fontSize: '13.89vw', 
-            lineHeight: 0.67 
+        {/* Score block — Figma positions (frame 1440×1024) */}
+        {/* GAME SCORE — Saudi Regular 400 · 100px · LH 67% · right · above value */}
+        <div
+          className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
+          style={{
+            top: `${(250 / 1024) * 100}%`,
+            left: `${(888.56 / 1440) * 100}%`,
+            width: `${((1025 + 241 - 888.56) / 1440) * 100}%`,
+            fontSize: '6.94vw',
+            lineHeight: '67%',
+            letterSpacing: 0,
+            fontWeight: 400,
+            textAlign: 'right',
           }}
         >
-          {journey.score}
+          Game score
         </div>
 
-        {/* REGIONS COMPLETED Title (Estimated above Regions) */}
-        <div 
-          className="absolute flex items-center justify-center font-display text-white tracking-[0.2em]"
-          style={{ top: '56%', left: '55%', width: '40%', height: '6%', fontSize: '2.5vw' }}
-        >
-          REGIONS COMPLETED
-        </div>
-
-        {/* Dynamic Regions Completed (X: 1080, Y: 656) */}
-        <div 
-          className="absolute flex items-center justify-center font-display font-bold text-white"
-          style={{ 
-            top: '64.06%', 
-            left: '75%', 
-            width: '12.92%', 
-            height: '13.09%', 
-            fontSize: '13.89vw', 
-            lineHeight: 0.67 
+        {/* Score value — Figma: x 1025, y 332, 241×134, Saudi Bold 200, LH 67%, right */}
+        <div
+          className="font-saudi pointer-events-none absolute uppercase text-white"
+          style={{
+            top: `${(332 / 1024) * 100}%`,
+            left: `${(1025 / 1440) * 100}%`,
+            width: `${(241 / 1440) * 100}%`,
+            height: `${(134 / 1024) * 100}%`,
+            fontSize: '13.89vw',
+            lineHeight: '67%',
+            letterSpacing: 0,
+            fontWeight: 700,
+            textAlign: 'right',
           }}
         >
-          <div className="flex items-baseline">
-            <span>{completedRegions.length}</span>
-            <span className="text-[7vw] opacity-80">/13</span>
-          </div>
+          {animatedScore}
+        </div>
+
+        {/* REGIONS COMPLETED — Figma: x 639, y 602, 627×67, Saudi Regular 100, LH 67%, right, one line */}
+        <div
+          className="font-saudi pointer-events-none absolute whitespace-nowrap uppercase text-white"
+          style={{
+            top: `${(602 / 1024) * 100}%`,
+            right: `${((1440 - (639 + 627)) / 1440) * 100}%`,
+            fontSize: '6.94vw',
+            lineHeight: '67%',
+            letterSpacing: 0,
+            fontWeight: 400,
+            textAlign: 'right',
+          }}
+        >
+          Regions completed
+        </div>
+
+        {/* Regions value — Figma: x 1080, y 656, 186×134; 200 Bold + /13 100 Regular */}
+        <div
+          className="font-saudi pointer-events-none absolute flex items-baseline justify-end uppercase text-white"
+          style={{
+            top: `${(656 / 1024) * 100}%`,
+            left: `${(1080 / 1440) * 100}%`,
+            width: `${(186 / 1440) * 100}%`,
+            height: `${(134 / 1024) * 100}%`,
+            fontSize: '13.89vw',
+            lineHeight: '67%',
+            letterSpacing: 0,
+            fontWeight: 700,
+            textAlign: 'right',
+          }}
+        >
+          <span>{animatedRegions}</span>
+          <span style={{ fontSize: '6.94vw', fontWeight: 400, lineHeight: '67%' }}>/{regions.length}</span>
         </div>
 
 
@@ -518,34 +859,214 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
           </PrimaryButton>
         </div>
       </div>
+
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#004C42] lg:hidden">
+        <ScreenHeader />
+        <img
+          src="/welcome_bg.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-35"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#004C42]/70 via-[#004C42]/80 to-[#00352e]" />
+
+        <div className="relative z-10 flex flex-1 flex-col px-5 py-8 text-white">
+          <p className="font-mod text-[11px] font-medium uppercase tracking-[.18em] text-white/70">Saudi National Day edition</p>
+          <h1
+            className="font-saudi mt-2 uppercase tracking-normal"
+            style={{ fontSize: '36px', fontWeight: 700, lineHeight: '67%' }}
+          >
+            Congratulations!
+          </h1>
+          <p className="font-mod mt-3 text-[15px] font-medium text-white/80" style={{ lineHeight: '140%' }}>
+            Your passport journey across Saudi Arabia.
+          </p>
+
+          <div className="mt-8 space-y-4">
+            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-right backdrop-blur-sm">
+              <p
+                className="font-saudi uppercase text-white"
+                style={{ fontSize: '22px', fontWeight: 400, lineHeight: '67%' }}
+              >
+                Game score
+              </p>
+              <p
+                className="font-saudi mt-2 uppercase text-white"
+                style={{ fontSize: '56px', fontWeight: 700, lineHeight: '67%' }}
+              >
+                {animatedScore}
+              </p>
+            </div>
+            <div className="rounded-[24px] bg-white/12 px-5 py-6 text-right backdrop-blur-sm">
+              <p
+                className="font-saudi uppercase text-white"
+                style={{ fontSize: '22px', fontWeight: 400, lineHeight: '67%' }}
+              >
+                Regions completed
+              </p>
+              <p
+                className="font-saudi mt-2 flex items-baseline justify-end uppercase text-white"
+                style={{ fontSize: '56px', fontWeight: 700, lineHeight: '67%' }}
+              >
+                <span>{animatedRegions}</span>
+                <span style={{ fontSize: '28px', fontWeight: 400, lineHeight: '67%' }}>/{regions.length}</span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onViewPassport}
+            data-testid="button-view-passport-mobile"
+            className="font-saudi mt-auto inline-flex min-h-14 w-full items-center justify-center rounded-full bg-white text-[18px] font-normal text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)]"
+          >
+            View My Passport
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
-function StampScreen({ onContinue, onFinish }: { onContinue: () => void; onFinish: () => void }) {
+function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void; onFinish: () => void; allDone: boolean }) {
   return (
-    <div className="flex flex-col w-full bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
-      <div className="relative w-full aspect-[1440/1024] bg-[#F2F2F2] overflow-hidden">
-        <img 
-          src="/frame3.svg" 
-          alt="Region Completed Stamp" 
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none" 
+    <div className="screen-in flex w-full flex-col bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
+      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
+        <div className="ken-burns absolute inset-0">
+          <img
+            src="/frame3_no_stamp.svg"
+            alt="Region Completed"
+            className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+          />
+          <img
+            src="/completed-stamp.svg"
+            alt="Completed"
+            className="stamp-pop-seal pointer-events-none absolute"
+            style={{
+              top: '29.95%',
+              left: '6.33%',
+              width: '30.46%',
+              height: '43.77%',
+              animationDelay: '180ms',
+            }}
+          />
+          <img
+            src="/stamp-congrats.svg"
+            alt=""
+            className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+            style={{ animationDelay: '280ms' }}
+          />
+          <img
+            src="/stamp-body.svg"
+            alt=""
+            className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+            style={{ animationDelay: '360ms' }}
+          />
+          {allDone ? (
+            <button
+              onClick={onContinue}
+              className="q-card-in absolute flex items-center justify-center gap-[0.8vw] bg-white font-bold text-[#004C42] transition-opacity hover:opacity-90"
+              style={{
+                top: '50%',
+                left: '38.82%',
+                width: '39.65%',
+                height: '14.45%',
+                borderRadius: '2.79vw',
+                fontSize: '1.7vw',
+                animationDelay: '520ms',
+              }}
+            >
+              <span>View my summary</span>
+              <ArrowRight className="h-[1.6vw] w-[1.6vw] shrink-0" strokeWidth={3} />
+            </button>
+          ) : (
+            <>
+              <img
+                src="/stamp-continue.svg"
+                alt=""
+                className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+                style={{ animationDelay: '520ms' }}
+              />
+              <button
+                onClick={onContinue}
+                className="absolute cursor-pointer bg-transparent"
+                style={{ top: '50%', left: '38.82%', width: '39.65%', height: '14.45%' }}
+                aria-label="Continue to the next destination"
+              />
+            </>
+          )}
+          <img
+            src="/stamp-finish.svg"
+            alt=""
+            className="q-card-in pointer-events-none absolute inset-0 h-full w-full object-contain"
+            style={{ animationDelay: '620ms' }}
+          />
+          <button
+            onClick={onFinish}
+            className="absolute cursor-pointer bg-transparent"
+            style={{ top: '68.55%', left: '42.01%', width: '23.75%', height: '4.88%' }}
+            aria-label="Finish my journey"
+          />
+        </div>
+      </div>
+
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#004C42] lg:hidden">
+        <img
+          src="/welcome_bg.jpg"
+          alt=""
+          className="mobile-stamp-art pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
         />
-        {/* Button 1: Continue (White Pill) - Exact Figma Coordinates */}
-        <button 
-          onClick={onContinue}
-          className="absolute bg-transparent cursor-pointer"
-          style={{ top: '50%', left: '38.82%', width: '39.65%', height: '14.45%' }}
-          aria-label="Continue to the next destination"
-        />
-        
-        {/* Button 2: Finish - Exact Figma Coordinates */}
-        <button 
-          onClick={onFinish}
-          className="absolute bg-transparent cursor-pointer"
-          style={{ top: '68.55%', left: '42.01%', width: '23.75%', height: '4.88%' }}
-          aria-label="Finish my journey"
-        />
+        <div className="pointer-events-none absolute inset-0 overlay-in bg-[#004C42]/70" />
+
+        <div className="relative z-10 flex min-h-dvh flex-col">
+          <ScreenHeader />
+
+          <div className="flex flex-1 flex-col items-center px-5 py-8 text-center text-white">
+            <p className="q-card-in font-mod text-[11px] font-medium uppercase tracking-[.18em] text-white/70">Your passport</p>
+
+            <img
+              src="/completed-stamp.svg"
+              alt="Completed"
+              className="stamp-pop-seal mt-7 h-[13.5rem] w-[13.5rem] object-contain drop-shadow-[0_16px_40px_rgba(0,0,0,.28)]"
+              style={{ animationDelay: '120ms' }}
+            />
+
+            <h1
+              className="q-card-in font-saudi mt-8 uppercase tracking-normal"
+              style={{ animationDelay: '280ms', fontSize: '36px', fontWeight: 700, lineHeight: '67%' }}
+            >
+              Congratulations!
+            </h1>
+            <p
+              className="q-card-in font-mod mt-3 text-[15px] font-medium text-white/85"
+              style={{ animationDelay: '360ms', lineHeight: '140%' }}
+            >
+              You have completed this region.
+            </p>
+            <p
+              className="q-card-in font-mod mt-1 text-[13px] font-medium text-white/70"
+              style={{ animationDelay: '420ms', lineHeight: '140%' }}
+            >
+              You get a new stamp in your digital passport.
+            </p>
+
+            <div className="q-card-in mt-8 w-full" style={{ animationDelay: '520ms' }}>
+              <button
+                onClick={onContinue}
+                className="font-saudi submit-ready inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-white text-[18px] font-normal text-[#004C42] shadow-[0_8px_20px_rgba(0,0,0,.2)] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                style={{ animationDelay: '900ms' }}
+              >
+                <span>{allDone ? 'View my summary' : 'Continue to the next destination'}</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
+            <button
+              onClick={onFinish}
+              className="q-card-in font-saudi mt-4 inline-flex items-center gap-2 text-[16px] font-normal text-white underline underline-offset-4"
+              style={{ animationDelay: '600ms' }}
+            >
+              Finish my journey
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -605,14 +1126,12 @@ function App() {
     });
   };
 
-  const completeRegion = (id: string) => { 
+  const completeRegion = (id: string) => {
     setJourney((prev) => {
-       const newCompleted = prev.completed.includes(id) ? prev.completed : [...prev.completed, id];
-       const allDone = newCompleted.length >= regions.length;
-       // Go directly to summary if all regions done, else continue quiz
-       setScreen(allDone ? 'summary' : 'quiz');
-       return { ...prev, completed: newCompleted };
+      const newCompleted = prev.completed.includes(id) ? prev.completed : [...prev.completed, id];
+      return { ...prev, completed: newCompleted };
     });
+    setScreen('stamp');
   };
 
   const restart = () => { 
@@ -635,7 +1154,13 @@ function App() {
       )}
       {screen === 'welcome' && <Welcome journey={journey} onStart={start} />}
       {screen === 'quiz' && activeRegion && <Quiz region={activeRegion} journey={journey} onComplete={completeRegion} onAnswer={answer} onFinish={() => setScreen('summary')} onViewPassport={() => setShowPassport(true)} />}
-      {screen === 'stamp' && <StampScreen onContinue={() => setScreen('quiz')} onFinish={() => setScreen('summary')} />}
+      {screen === 'stamp' && (
+        <StampScreen
+          allDone={journey.completed.length >= regions.length}
+          onContinue={() => setScreen(journey.completed.length >= regions.length ? 'summary' : 'quiz')}
+          onFinish={() => setScreen('summary')}
+        />
+      )}
       {screen === 'summary' && <Summary journey={journey} onRestart={restart} onViewPassport={() => setShowPassport(true)} />}
       
       {showPassport && (
