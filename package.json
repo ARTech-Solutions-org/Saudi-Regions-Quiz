@@ -11,7 +11,10 @@
   },
   "private": true,
   "dependencies": {
-    "@replit/connectors-sdk": "^0.4.3"
+    "@neondatabase/serverless": "^1.1.0",
+    "@replit/connectors-sdk": "^0.4.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "prettier": "^3.9.6",

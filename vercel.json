@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/artifacts/saudi-regions-quiz/server/index.js"
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",
