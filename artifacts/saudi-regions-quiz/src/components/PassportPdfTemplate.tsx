@@ -24,8 +24,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-cover.jpg"
               alt="Cover"
-              className="absolute inset-0 w-full h-full"
-              style={{ maxWidth: 'none' }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
           </div>
         </div>
@@ -36,7 +35,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-intro.svg"
               alt="Intro"
-              className="absolute inset-0 w-full h-full"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
             
             <div style={{ position: 'absolute', top: '28%', left: '3.5%', width: '40%', height: '6.64%', display: 'flex', alignItems: 'center', paddingLeft: '2%', paddingRight: '2%', color: '#004D40', fontSize: '22px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -57,7 +56,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-intro.svg"
               alt="Intro"
-              className="absolute inset-0 w-full h-full"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
           </div>
         </div>
@@ -68,7 +67,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-page.jpg"
               alt="Pages"
-              className="absolute inset-0 w-full h-full object-cover"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
 
             {regions.map((region) => {
@@ -84,8 +83,8 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
                     top: coords.top, 
                     left: coords.left,
                     transform: 'translate(-50%, -50%)',
-                    width: '10%',
-                    aspectRatio: '1/1',
+                    width: '144px',
+                    height: '144px',
                     borderRadius: '50%',
                     border: '4px dashed #DDB572',
                     backgroundColor: 'rgba(221, 181, 114, 0.2)',
@@ -105,9 +104,9 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden', backgroundColor: '#F6F4EB' }}>
           <div style={{ position: 'absolute', top: 0, left: '-720px', width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-page.svg"
+              src="/passport-page.jpg"
               alt="Pages"
-              className="absolute inset-0 w-full h-full object-cover"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
 
             {regions.map((region) => {
@@ -123,8 +122,8 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
                     top: coords.top, 
                     left: coords.left,
                     transform: 'translate(-50%, -50%)',
-                    width: '10%',
-                    aspectRatio: '1/1',
+                    width: '144px',
+                    height: '144px',
                     borderRadius: '50%',
                     border: '4px dashed #DDB572',
                     backgroundColor: 'rgba(221, 181, 114, 0.2)',
@@ -144,10 +143,9 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         <div data-pdf-page="true" style={{ width: '720px', height: '1024px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, width: '1440px', height: '1024px' }}>
             <img
-              src="/passport-cover.svg"
+              src="/passport-cover.jpg"
               alt="Cover"
-              className="absolute inset-0 w-full h-full"
-              style={{ maxWidth: 'none' }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             />
           </div>
         </div>
