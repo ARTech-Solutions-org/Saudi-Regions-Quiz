@@ -24,7 +24,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-cover-hq.png"
               alt="Cover"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ position: 'absolute', top: '50%', left: '50%', width: '1440px', height: '1422.2px', transform: 'translate(-50%, -50%)' }}
             />
           </div>
         </div>
@@ -35,7 +35,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-intro.svg"
               alt="Intro"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ position: 'absolute', top: '50%', left: '50%', width: '1440px', height: '1422.2px', transform: 'translate(-50%, -50%)' }}
             />
             
             <div style={{ position: 'absolute', top: '28%', left: '3.5%', width: '40%', height: '6.64%', display: 'flex', alignItems: 'center', paddingLeft: '2%', paddingRight: '2%', color: '#004D40', fontSize: '22px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -56,7 +56,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-intro.svg"
               alt="Intro"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ position: 'absolute', top: '50%', left: '50%', width: '1440px', height: '1422.2px', transform: 'translate(-50%, -50%)' }}
             />
           </div>
         </div>
@@ -67,7 +67,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-page-hq.png"
               alt="Pages"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ position: 'absolute', top: '50%', left: '50%', width: '1440px', height: '1422.2px', transform: 'translate(-50%, -50%)' }}
             />
 
             {regions.map((region) => {
@@ -106,7 +106,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-page-hq.png"
               alt="Pages"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ position: 'absolute', top: '50%', left: '50%', width: '1440px', height: '1422.2px', transform: 'translate(-50%, -50%)' }}
             />
 
             {regions.map((region) => {
@@ -145,7 +145,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
             <img
               src="/passport-cover-hq.png"
               alt="Cover"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ position: 'absolute', top: '50%', left: '50%', width: '1440px', height: '1422.2px', transform: 'translate(-50%, -50%)' }}
             />
           </div>
         </div>
