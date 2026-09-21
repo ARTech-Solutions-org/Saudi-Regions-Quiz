@@ -184,7 +184,8 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/admin/users')
+    const apiUrl = import.meta.env.PROD ? '/api/admin/users' : 'http://localhost:3001/api/admin/users';
+    fetch(apiUrl)
       .then(res => res.json())
       .then(data => {
         setUsers(data);

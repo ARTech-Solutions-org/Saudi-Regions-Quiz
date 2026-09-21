@@ -1,6 +1,6 @@
 import type { SavedJourney } from '../App';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 export async function saveJourney(email: string, name: string, journey: SavedJourney) {
   try {
