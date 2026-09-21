@@ -12,9 +12,11 @@ export async function saveJourney(email: string, name: string, journey: SavedJou
       body: JSON.stringify({
         email,
         name,
+        phone: journey.player?.phone,
         completed: journey.completed,
         answers: journey.answers,
         score: journey.score,
+        timeTaken: journey.timeTaken,
       }),
     });
     
@@ -43,7 +45,8 @@ export async function loadJourney(email: string): Promise<SavedJourney | null> {
       completed: data.completed_regions || [],
       answers: data.answers || {},
       score: data.score || 0,
-      player: { name: data.name, email: data.email },
+      timeTaken: data.time_taken || 0,
+      player: { name: data.name, email: data.email, phone: data.phone },
       currentRegion: null,
       currentQuestion: 0,
     };

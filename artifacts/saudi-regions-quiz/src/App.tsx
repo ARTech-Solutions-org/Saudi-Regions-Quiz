@@ -15,10 +15,11 @@ const queryClient = new QueryClient();
 const STORAGE_KEY = 'saudi-passport-journey-v1';
 
 export type SavedJourney = {
-  player: { name: string; email: string } | null;
+  player: { name: string; email: string; phone?: string } | null;
   completed: string[];
   answers: Record<string, number[]>;
   score: number;
+  timeTaken: number;
   currentRegion: string | null;
   currentQuestion: number;
 };
@@ -56,12 +57,14 @@ function AutoFitText({
   minSize,
   lineHeight,
   className,
+  textAlign,
 }: {
   text: string;
   maxSize: string;
   minSize: string;
   lineHeight?: string;
   className?: string;
+  textAlign?: 'left' | 'center' | 'right';
 }) {
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -118,7 +121,7 @@ function AutoFitText({
         fontSize: maxSize,
         lineHeight: lineHeight ?? 1.1865,
         letterSpacing: 0,
-        textAlign: 'center',
+        textAlign: textAlign ?? 'center',
         overflowWrap: 'anywhere',
         wordBreak: 'break-word',
       }}
@@ -131,10 +134,13 @@ function AutoFitText({
 function loadJourney(): SavedJourney {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? { ...blankJourney, ...JSON.parse(stored) } : blankJourney;
-  } catch {
-    return blankJourney;
-  }
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (!parsed.timeTaken) parsed.timeTaken = 0;
+      return { ...blankJourney, ...parsed };
+    }
+  } catch {}
+  return blankJourney;
 }
 
 function saveJourney(journey: SavedJourney) {
@@ -173,23 +179,110 @@ function PrimaryButton({ children, onClick, disabled = false, testId, secondary 
   );
 }
 
-function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: string, email: string) => void }) {
+function AdminDashboard() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/admin/users')
+      .then(res => res.json())
+      .then(data => {
+        setUsers(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div className="mx-auto flex h-full min-h-[100dvh] w-full flex-col bg-[#e0d6c8] text-black overflow-y-auto">
+      <div className="flex w-full flex-col gap-6 px-4 py-8 sm:px-12 max-w-[1200px] mx-auto">
+        <div className="flex justify-between items-center">
+          <h2 className="font-mod text-[32px] font-bold text-[#004C42] sm:text-[48px]">
+            Admin Dashboard
+          </h2>
+          <button
+            onClick={() => window.location.hash = ''}
+            className="bg-[#004C42] text-white px-6 py-2 rounded-full font-mod font-bold"
+          >
+            Back to Game
+          </button>
+        </div>
+
+        {loading ? (
+          <p className="font-mod text-xl">Loading users...</p>
+        ) : (
+          <div className="overflow-x-auto bg-white/50 p-4 sm:p-8 rounded-3xl shadow-sm border border-black/10">
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead>
+                <tr className="border-b-2 border-black/20 text-[#004C42] font-mod text-lg sm:text-xl">
+                  <th className="py-3 px-4 font-bold">Rank</th>
+                  <th className="py-3 px-4 font-bold">Name</th>
+                  <th className="py-3 px-4 font-bold">Email</th>
+                  <th className="py-3 px-4 font-bold">Phone</th>
+                  <th className="py-3 px-4 font-bold text-center">Regions (14)</th>
+                  <th className="py-3 px-4 font-bold text-center">Score</th>
+                  <th className="py-3 px-4 font-bold text-right">Time Taken</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user, idx) => {
+                  const regionCount = user.completed_regions ? user.completed_regions.length : 0;
+                  const totalSeconds = user.time_taken || 0;
+                  const mins = Math.floor(totalSeconds / 60);
+                  const secs = totalSeconds % 60;
+                  const timeString = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+                  return (
+                    <tr key={user.email} className="border-b border-black/10 font-saudi text-lg hover:bg-white/50 transition-colors">
+                      <td className="py-3 px-4 font-bold">#{idx + 1}</td>
+                      <td className="py-3 px-4">{user.name}</td>
+                      <td className="py-3 px-4 text-sm opacity-70">{user.email}</td>
+                      <td className="py-3 px-4 text-sm">{user.phone || '-'}</td>
+                      <td className="py-3 px-4 text-center">
+                        <span className={`px-2 py-1 rounded text-sm ${regionCount === 14 ? 'bg-[#004C42] text-white' : 'bg-black/10'}`}>
+                          {regionCount} / 14
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center font-bold text-[#004C42]">{user.score}</td>
+                      <td className="py-3 px-4 text-right font-mono">{timeString}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {users.length === 0 && (
+              <p className="text-center font-mod mt-8 opacity-50">No users found.</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: string, email: string, phone: string) => void }) {
   const [name, setName] = useState(journey.player?.name ?? '');
   const [email, setEmail] = useState(journey.player?.email ?? '');
+  const [phone, setPhone] = useState(journey.player?.phone ?? '');
   const [touched, setTouched] = useState(false);
   const hasResume = Boolean(journey.player);
-  const valid = name.trim().length > 1 && email.includes('@');
+  const valid = name.trim().length > 1 && email.includes('@') && phone.trim().length >= 8;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
     if (valid) {
-      onStart(name.trim(), email.trim());
+      onStart(name.trim(), email.trim(), phone.trim());
     } else {
       if (name.trim().length <= 1) {
         document.getElementById('welcome-name')?.focus();
       } else if (!email.includes('@')) {
         document.getElementById('welcome-email')?.focus();
+      } else if (phone.trim().length < 8) {
+        document.getElementById('welcome-phone')?.focus();
       }
     }
   };
@@ -359,6 +452,36 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
+                {/* Phone Input */}
+                <div>
+                  <input
+                    id="welcome-phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter your phone number"
+                    data-testid="input-player-phone"
+                    aria-label="Enter your phone number"
+                    className="font-mod box-border h-14 w-full rounded-full px-5 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px] sm:px-6 sm:text-[22px]"
+                    style={{
+                      fontWeight: 300,
+                      lineHeight: '140%',
+                      color: '#000000',
+                      letterSpacing: 0,
+                      border: touched && phone.trim().length < 8 ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
+                      backgroundColor: '#ffffff',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#004C42';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 76, 66, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = touched && phone.trim().length < 8 ? '#d9383a' : '#A1A1A1';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
                 {/* Submit — Figma: Saudi Regular 400, 32.3px, LH 140%, #FFFFFF, center */}
                 <div className="pt-1">
                   <button
@@ -437,13 +560,16 @@ function ScreenHeader() {
   );
 }
 
-function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport }: { region: Region; journey: SavedJourney; onComplete: (regionId: string) => void; onAnswer: (regionId: string, questionIndex: number, answer: number) => void; onFinish: () => void; onViewPassport: () => void }) {
+function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport }: { region: Region; journey: SavedJourney; onComplete: (regionId: string, timeSpentSeconds: number) => void; onAnswer: (regionId: string, questionIndex: number, answer: number) => void; onFinish: () => void; onViewPassport: () => void }) {
   const [shownRegion, setShownRegion] = useState(region);
   const [leaving, setLeaving] = useState(false);
   const existing = journey.answers[shownRegion.id] ?? [];
   const allAnswered = shownRegion.questions.every((_, idx) => existing[idx] !== undefined);
   const [wrongAttempts, setWrongAttempts] = useState<Record<number, number[]>>({});
   const [submitPulse, setSubmitPulse] = useState(false);
+  
+  // Track mount time for tracking elapsed time spent on this region quiz
+  const mountTimeRef = useRef(Date.now());
   const regionNumber = Math.min(journey.completed.length + 1, regions.length);
   const totalQuestions = shownRegion.questions.length;
   const answeredCount = shownRegion.questions.reduce(
@@ -487,19 +613,27 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
       {/* Desktop Figma frame — readable from ~1024px up */}
       <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-white lg:block">
-        <div className="ken-burns absolute inset-0">
+        <div className="absolute inset-0">
+        
+        {/* Region specific background image behind the main layout */}
+        <img 
+          src={`/bg_${shownRegion.id.replace('-', '_')}.jpg`}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain object-left pointer-events-none" 
+          style={{ WebkitMaskImage: 'linear-gradient(to right, black 35%, transparent 60%)', maskImage: 'linear-gradient(to right, black 35%, transparent 60%)' }}
+        />
         
         {/* The SVG Background (No Text). Using it precisely as the layout! */}
         <img 
-          src="/frame2_no_text.svg" 
+          src="/frame2_no_text.svg"
           alt="Quiz Background" 
           className="absolute inset-0 w-full h-full object-contain pointer-events-none" 
         />
         
         {/* Overlay 1: Region title — Figma: Saudi Bold 700, 100px, LH 55px, #FFFFFF, uppercase */}
         <div 
-          className="absolute"
-          style={{ top: `${((114.5 - 100) / 1024) * 100}%`, left: `${(77 / 1440) * 100}%` }}
+          className="absolute flex items-center"
+          style={{ top: '4.5%', left: '5.3%', height: '8%' }}
         >
           <h1
             key={shownRegion.id}
@@ -558,10 +692,16 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                   style={{ animationDelay: leaving ? '0ms' : `${qIndex * 90}ms` }}
                 >
                   <p
-                    className="font-saudi tracking-normal text-[#004C42]"
-                    style={{ fontSize: '2.43vw', fontWeight: 700, lineHeight: '2.08vw', letterSpacing: 0 }}
+                    className="font-saudi tracking-normal text-[#004C42] w-full h-full flex items-center"
+                    style={{ fontWeight: 700, letterSpacing: 0 }}
                   >
-                    {question.prompt}
+                    <AutoFitText
+                      text={question.prompt}
+                      maxSize="2.43vw"
+                      minSize="1vw"
+                      lineHeight="1.15"
+                      textAlign="left"
+                    />
                   </p>
                 </div>
               </div>
@@ -598,9 +738,9 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                       <span className="flex h-full w-full items-center justify-center overflow-hidden py-[4%]">
                         <AutoFitText
                           text={option}
-                          maxSize="1.3889vw"
-                          minSize="0.75vw"
-                          lineHeight="1.1865"
+                          maxSize="1.15vw"
+                          minSize="0.6vw"
+                          lineHeight="1.15"
                         />
                       </span>
                       {isAnswer && <Check size={16} strokeWidth={4} className="check-pop pointer-events-none absolute right-[6%] text-white" />}
@@ -616,7 +756,12 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
         {/* Overlay 4: Bottom Action Buttons */}
         {/* Submit Button Overlay */}
         <button 
-          onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
+          onClick={() => {
+            if (allAnswered && !leaving) {
+              const elapsedSecs = Math.floor((Date.now() - mountTimeRef.current) / 1000);
+              onComplete(shownRegion.id, elapsedSecs);
+            }
+          }}
           disabled={!allAnswered || leaving}
           className={`font-saudi absolute flex items-center justify-center text-[2.64vw] font-normal tracking-normal transition-all focus:outline-none ${
             allAnswered ? `text-white hover:opacity-80 ${submitPulse ? 'submit-ready-text' : ''}` : 'cursor-not-allowed text-white/50'
@@ -640,6 +785,12 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
 
       {/* Mobile / tablet stacked layout */}
       <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#ebeae4] lg:hidden">
+        <img
+          src={`/bg_${shownRegion.id.replace('-', '_')}.jpg`}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-left-top pointer-events-none"
+          style={{ WebkitMaskImage: 'linear-gradient(to right, black 35%, transparent 60%)', maskImage: 'linear-gradient(to right, black 35%, transparent 60%)' }}
+        />
         <img
           src="/frame2_no_text.svg"
           alt=""
@@ -721,7 +872,7 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
                         }}
                       >
                         <span className="min-w-0 flex-1 overflow-hidden pr-2">
-                          <AutoFitText text={option} maxSize="20px" minSize="12px" lineHeight="1.1865" />
+                          <AutoFitText text={option} maxSize="16px" minSize="9px" lineHeight="1.15" />
                         </span>
                         {isAnswer && <Check size={18} strokeWidth={3} className="check-pop shrink-0 text-white" />}
                       </button>
@@ -733,7 +884,12 @@ function Quiz({ region, journey, onComplete, onAnswer, onFinish, onViewPassport 
           })}
 
           <button
-            onClick={() => allAnswered && !leaving && onComplete(shownRegion.id)}
+            onClick={() => {
+              if (allAnswered && !leaving) {
+                const elapsedSecs = Math.floor((Date.now() - mountTimeRef.current) / 1000);
+                onComplete(shownRegion.id, elapsedSecs);
+              }
+            }}
             disabled={!allAnswered || leaving}
             className={`font-saudi mt-2 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#004C42] text-[18px] font-normal text-white shadow-[0_8px_20px_rgba(0,89,77,.16)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 ${allAnswered && submitPulse ? 'submit-ready' : ''}`}
           >
@@ -929,8 +1085,8 @@ function Summary({ journey, onRestart, onViewPassport }: { journey: SavedJourney
 function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void; onFinish: () => void; allDone: boolean }) {
   return (
     <div className="screen-in flex w-full flex-col bg-white selection:bg-[#004C42] selection:text-white" style={{ fontFamily: 'Saudi, sans-serif' }}>
-      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#F2F2F2] lg:block">
-        <div className="ken-burns absolute inset-0">
+      <div className="relative hidden w-full aspect-[1440/1024] overflow-hidden bg-[#ebeae4] lg:block">
+        <div className="absolute inset-0">
           <img
             src="/frame3_no_stamp.svg"
             alt="Region Completed"
@@ -1073,7 +1229,25 @@ function StampScreen({ onContinue, onFinish, allDone }: { onContinue: () => void
 }
 
 function App() {
-  const [journey, setJourney] = useState<SavedJourney>(() => loadJourney());
+  const [journey, setJourney] = useState<SavedJourney>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!parsed.timeTaken) parsed.timeTaken = 0;
+        return parsed;
+      }
+    } catch {}
+    return {
+      player: null,
+      completed: [],
+      answers: {},
+      score: 0,
+      timeTaken: 0,
+      currentRegion: null,
+      currentQuestion: 0,
+    };
+  });
   const [showPassport, setShowPassport] = useState(false);
   
   // Determine if all regions are completed
@@ -1081,6 +1255,14 @@ function App() {
   // Automatically determine the active region
   const activeRegion = useMemo(() => regions.find(r => !journey.completed.includes(r.id)) || null, [journey.completed]);
   
+  // Custom Hook to track hash changes for admin routing
+  const [hash, setHash] = useState(window.location.hash);
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
   const [screen, setScreen] = useState<'welcome' | 'quiz' | 'stamp' | 'summary'>(() => {
     if (!journey.player) return 'welcome';
     if (isComplete) return 'summary';
@@ -1096,14 +1278,14 @@ function App() {
 
   const [isLoadingDB, setIsLoadingDB] = useState(false);
 
-  const start = async (name: string, email: string) => {
+  const start = async (name: string, email: string, phone: string) => {
     setIsLoadingDB(true);
-    let next = { ...journey, player: { name, email } };
+    let next = { ...journey, player: { name, email, phone } };
     
     // Attempt to load from database
     const backendJourney = await apiLoadJourney(email);
     if (backendJourney) {
-      next = { ...backendJourney, player: { name, email } };
+      next = { ...backendJourney, player: { name, email, phone } };
     }
     
     setJourney(next);
@@ -1126,10 +1308,17 @@ function App() {
     });
   };
 
-  const completeRegion = (id: string) => {
+  const completeRegion = (id: string, timeSpentSeconds: number) => {
     setJourney((prev) => {
       const newCompleted = prev.completed.includes(id) ? prev.completed : [...prev.completed, id];
-      return { ...prev, completed: newCompleted };
+      const nextTimeTaken = (prev.timeTaken || 0) + (timeSpentSeconds || 0);
+      const next = { ...prev, completed: newCompleted, timeTaken: nextTimeTaken };
+      
+      // Sync with backend when a region is completed
+      if (next.player) {
+        apiSaveJourney(next.player.email, next.player.name, next);
+      }
+      return next;
     });
     setScreen('stamp');
   };
@@ -1141,6 +1330,10 @@ function App() {
       setScreen('welcome'); 
     } 
   };
+
+  if (hash === '#admin') {
+    return <AdminDashboard />;
+  }
 
   return (
     <div className="passport-app grain relative">
@@ -1168,6 +1361,7 @@ function App() {
           journey={journey} 
           onClose={() => setShowPassport(false)} 
           onResume={() => { setShowPassport(false); setScreen('quiz'); }}
+          onRestart={() => { setShowPassport(false); restart(); }}
         />
       )}
     </div>

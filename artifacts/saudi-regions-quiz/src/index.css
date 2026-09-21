@@ -139,3 +139,20 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+@keyframes turnPageForward {
+  0% { transform: perspective(2000px) rotateY(0); z-index: 50; }
+  100% { transform: perspective(2000px) rotateY(-180deg); z-index: 50; }
+}
+@keyframes turnPageBackward {
+  0% { transform: perspective(2000px) rotateY(0); z-index: 50; }
+  100% { transform: perspective(2000px) rotateY(180deg); z-index: 50; }
+}
+.page-turn-forward {
+  animation: turnPageForward 0.8s ease-in-out forwards;
+}
+.page-turn-backward {
+  animation: turnPageBackward 0.8s ease-in-out forwards;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
