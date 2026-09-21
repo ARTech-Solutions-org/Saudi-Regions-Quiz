@@ -114,10 +114,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
   const stampsSpread = (
     <div className="w-full h-full transform scale-[1.03] origin-center">
-      <div
-        className="absolute inset-0 pointer-events-none [&>svg]:w-full [&>svg]:h-full"
-        dangerouslySetInnerHTML={{ __html: pageSvg }}
-      />
+      <img src="/passport-page.svg" className="absolute inset-0 w-full h-full object-cover" alt="Passport Page" />
 
       {regions.map((region, index) => {
         const coords = regionCoords[region.id];
@@ -155,17 +152,9 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   );
 
   useEffect(() => {
-    fetch('/passport-cover.svg')
-      .then(res => res.text())
-      .then(text => setCoverSvg(text));
-      
     fetch('/passport-intro.svg')
       .then(res => res.text())
       .then(text => setIntroSvg(text));
-
-    fetch('/passport-page.svg')
-      .then(res => res.text())
-      .then(text => setPageSvg(text.replace(/<svg /, '<svg preserveAspectRatio="xMidYMid slice" ')));
   }, []);
 
   return (
@@ -217,11 +206,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
                 pointerEvents: 'none',
               }}
             >
-              {/* The inline SVG must fill this 200%-wide div */}
-              <div
-                style={{ width: '100%', height: '100%' }}
-                dangerouslySetInnerHTML={{ __html: coverSvg }}
-              />
+              <img src="/passport-cover.svg" className="w-full h-full object-fill" alt="Passport Cover" />
             </div>
 
             {/* Spine shadow — left edge */}

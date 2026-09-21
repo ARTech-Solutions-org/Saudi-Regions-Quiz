@@ -24,6 +24,11 @@ async function initDB() {
         last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    
+    // Add columns if they don't exist
+    await sql`ALTER TABLE journeys ADD COLUMN IF NOT EXISTS phone VARCHAR(50)`;
+    await sql`ALTER TABLE journeys ADD COLUMN IF NOT EXISTS time_taken INTEGER DEFAULT 0`;
+    
     console.log('Database table initialized.');
   } catch (err) {
     console.error('Failed to initialize database:', err);
@@ -33,7 +38,7 @@ async function initDB() {
 initDB();
 
 app.post('/api/journey', async (req, res) => {
-  const { email, name, completed, answers, score } = req.body;
+  const { email, name, phone, completed, answers, score, timeTaken } = req.body;
 
   if (!email || !name) {
     return res.status(400).json({ error: 'Email and name are required' });
@@ -41,13 +46,15 @@ app.post('/api/journey', async (req, res) => {
 
   try {
     await sql`
-      INSERT INTO journeys (email, name, completed_regions, answers, score, last_updated)
-      VALUES (${email}, ${name}, ${JSON.stringify(completed)}, ${JSON.stringify(answers)}, ${score}, CURRENT_TIMESTAMP)
+      INSERT INTO journeys (email, name, phone, completed_regions, answers, score, time_taken, last_updated)
+      VALUES (${email}, ${name}, ${phone || null}, ${JSON.stringify(completed)}, ${JSON.stringify(answers)}, ${score}, ${timeTaken || 0}, CURRENT_TIMESTAMP)
       ON CONFLICT (email) DO UPDATE SET
         name = EXCLUDED.name,
+        phone = EXCLUDED.phone,
         completed_regions = EXCLUDED.completed_regions,
         answers = EXCLUDED.answers,
         score = EXCLUDED.score,
+        time_taken = EXCLUDED.time_taken,
         last_updated = CURRENT_TIMESTAMP
     `;
     res.json({ success: true });
@@ -77,6 +84,19 @@ app.get('/api/journey/:email', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
+
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const result = await sql`
+      SELECT * FROM journeys 
+      ORDER BY score DESC, time_taken ASC
+    `;
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
