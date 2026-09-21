@@ -1350,6 +1350,10 @@ function App() {
 
   const restart = () => { 
     if (window.confirm('Start a new passport journey? Your progress will be cleared.')) { 
+      if (journey.player) {
+        // Wipe progress in the database so it doesn't get reloaded if they use the same email
+        apiSaveJourney(journey.player.email, journey.player.name, { ...blankJourney, player: journey.player });
+      }
       localStorage.removeItem(STORAGE_KEY); 
       setJourney(blankJourney); 
       setScreen('welcome'); 
