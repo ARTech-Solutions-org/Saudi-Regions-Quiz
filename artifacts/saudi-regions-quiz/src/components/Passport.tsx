@@ -99,7 +99,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <div className="absolute text-black font-display text-[1.1vw] font-bold z-10 flex items-center px-[2%] whitespace-nowrap overflow-hidden text-ellipsis" style={{ top: '47%', left: '6.5%', width: '82%', height: '9.5%' }}>
         {journey.player?.email}
       </div>
-      <div className="absolute text-black font-display text-[1.3vw] font-bold z-10 px-[2%] overflow-hidden" style={{ top: '60%', left: '6.5%', width: '82%', height: '30.5%', paddingTop: '3%', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+      <div className="absolute text-black font-display text-[1.3vw] font-bold z-10 px-[2%] overflow-hidden" style={{ top: '63%', left: '6.5%', width: '82%', height: '30.5%', paddingTop: '3%', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
         {journey.player?.phone}
       </div>
     </div>
@@ -182,7 +182,10 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
             <div className="absolute inset-0 pointer-events-none rounded-r-2xl" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
           </div>
         ) : (
-          <div className="relative w-full h-full rounded-xl overflow-hidden bg-[#F6F4EB]">
+          <div
+            className="relative w-full h-full rounded-xl overflow-hidden bg-[#F6F4EB]"
+            style={{ perspective: 2000, WebkitPerspective: 2000 }}
+          >
             {page > 1 && !flipping && <div className="absolute inset-y-0 left-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('backward')} />}
             {page < 2 && !flipping && <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('forward')} />}
 
