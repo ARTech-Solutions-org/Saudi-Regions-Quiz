@@ -35,12 +35,14 @@ export const regionCoords: Record<string, { top: string, left: string }> = {
 export function Passport({ journey, onClose, onResume, onRestart }: PassportProps) {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  // page: 0 = Front cover (مقفول، صغيّر), 1 = Open spread (stamps), 2 = Back cover (مقفول، صغيّر)
+  // page: 0 = Front cover (مقفول، صغيّر), 1 = Open spread (أختام1 + أختام2), 2 = Open spread (أختام1 + الغلاف الخلفي)
   const [page, setPage] = useState(0);
   const [flipping, setFlipping] = useState<'forward' | 'backward' | null>(null);
 
-  // الحجم الكبير (السبريد) شغال بس وانت في صفحة الأختام أو أثناء حركة القلب.
-  const expanded = page === 1 || flipping !== null;
+  // الحجم الكبير (السبريد) شغال طول الوقت من أول ما نفتح الباسبور —
+  // الغلاف الخلفي بيتعرض جوّه نفس السبريد (مش صندوق منفصل)، فمفيش أي
+  // تغيير حجم أو فراغ حوالين الغلاف.
+  const opened = page !== 0;
 
   const turnPage = (direction: 'forward' | 'backward') => {
     if (flipping) return;
@@ -158,11 +160,11 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
         &times;
       </button>
 
-      <div className={`absolute transition-all duration-700 pointer-events-none rounded-full blur-3xl opacity-30 ${expanded ? 'w-[80vw] max-w-5xl h-48 bg-amber-600/40 bottom-1/3' : 'w-64 h-96 bg-emerald-800/50'}`} />
+      <div className={`absolute transition-all duration-700 pointer-events-none rounded-full blur-3xl opacity-30 ${opened ? 'w-[80vw] max-w-5xl h-48 bg-amber-600/40 bottom-1/3' : 'w-64 h-96 bg-emerald-800/50'}`} />
 
       <div
-        className={`relative transition-all duration-700 ease-in-out ${expanded ? 'w-[90%] sm:w-[80%] md:w-[70%] max-w-3xl aspect-[1440/1024]' : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'}`}
-        style={{ filter: expanded ? 'drop-shadow(0 40px 60px rgba(0,0,0,0.7)) drop-shadow(0 10px 20px rgba(0,0,0,0.5))' : 'drop-shadow(-8px 8px 20px rgba(0,0,0,0.8)) drop-shadow(-2px 4px 8px rgba(0,0,0,0.6))' }}
+        className={`relative transition-all duration-700 ease-in-out ${opened ? 'w-[90%] sm:w-[80%] md:w-[70%] max-w-3xl aspect-[1440/1024]' : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'}`}
+        style={{ filter: opened ? 'drop-shadow(0 40px 60px rgba(0,0,0,0.7)) drop-shadow(0 10px 20px rgba(0,0,0,0.5))' : 'drop-shadow(-8px 8px 20px rgba(0,0,0,0.8)) drop-shadow(-2px 4px 8px rgba(0,0,0,0.6))' }}
         onClick={() => { if (page === 0 && !flipping) { setTimeout(() => setPage(1), 50); } }}
       >
         {page === 0 ? (
@@ -183,27 +185,8 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
             <div className="absolute top-0 left-0 w-full h-[30%] pointer-events-none" style={{ background: 'linear-gradient(160deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
             <div className="absolute inset-0 pointer-events-none rounded-r-2xl" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
           </div>
-        ) : page === 2 && !flipping ? (
-          /* ── الغلاف الخلفي (مقفول، صغيّر) — دوسة عليه ترجّع تفتح ── */
-          <div
-            className="relative w-full h-full overflow-hidden rounded-l-2xl bg-transparent"
-            style={{
-              cursor: 'pointer',
-              transform: 'translateZ(0)',
-              WebkitTransform: 'translateZ(0)',
-              WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-            }}
-            onClick={() => turnPage('backward')}
-          >
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
-              <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
-            </div>
-            <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
-            <div className="absolute top-0 right-0 w-full h-[30%] pointer-events-none" style={{ background: 'linear-gradient(-160deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
-            <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
-          </div>
         ) : (
-          /* ── السبريد المفتوح (صفحة 1) أو حركة القلب ─────── */
+          /* ── السبريد المفتوح: صفحة 1 (أختام) أو صفحة 2 (أختام + غلاف خلفي) أو حركة القلب ── */
           <div
             className="relative w-full h-full rounded-xl overflow-hidden bg-[#F6F4EB]"
             style={{ perspective: 2000, WebkitPerspective: 2000 }}
@@ -211,11 +194,21 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
             {page === 1 && !flipping && (
               <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('forward')} />
             )}
+            {page === 2 && !flipping && (
+              <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('backward')} />
+            )}
 
             {page === 1 && !flipping && (
               <div className="absolute inset-0 flex">
                 <div className="w-1/2 h-full">{StampsPage1}</div>
                 <div className="w-1/2 h-full">{StampsPage2}</div>
+              </div>
+            )}
+
+            {page === 2 && !flipping && (
+              <div className="absolute inset-0 flex">
+                <div className="w-1/2 h-full">{StampsPage1}</div>
+                <div className="w-1/2 h-full">{BackCoverPage}</div>
               </div>
             )}
 
@@ -250,7 +243,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
         )}
       </div>
 
-      {page === 1 && !isGeneratingPdf && (
+      {page !== 0 && !isGeneratingPdf && (
         <div className="mt-8 flex gap-4">
           <button onClick={generatePDF} className="bg-transparent border-2 border-[hsl(var(--accent))] text-[hsl(var(--accent))] px-6 py-2.5 rounded-xl font-bold font-display hover:bg-[hsl(var(--accent))]/10 transition-all shadow-lg active:scale-95 flex items-center gap-2">
             <span>PDF</span>
