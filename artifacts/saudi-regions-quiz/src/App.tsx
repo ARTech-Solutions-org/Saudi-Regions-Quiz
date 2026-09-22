@@ -399,7 +399,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     id="welcome-name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.replace(/[\u0600-\u06FF]/g, ''))}
                     placeholder="Enter your full name"
                     data-testid="input-player-name"
                     aria-label="Enter your full name"
@@ -429,7 +429,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     id="welcome-email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.replace(/[\u0600-\u06FF]/g, ''))}
                     placeholder="Enter your email address"
                     data-testid="input-player-email"
                     aria-label="Enter your email address"
@@ -458,7 +458,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   <textarea
                     id="welcome-saudi-word"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => setPhone(e.target.value.replace(/[\u0600-\u06FF]/g, ''))}
                     placeholder="Enter a word for Saudi Arabia"
                     data-testid="input-player-saudi-word"
                     aria-label="Enter a word for Saudi Arabia"
