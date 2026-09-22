@@ -235,10 +235,14 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
             )}
 
             <div className="absolute inset-y-0 left-[49.5%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
-            <div className="absolute inset-y-0 left-[50%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
+            {!(page === 2 && !flipping) && (
+              <div className="absolute inset-y-0 left-[50%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
+            )}
             <div className="absolute inset-y-0 left-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
-            <div className="absolute inset-y-0 right-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
-            <div className="absolute top-0 inset-x-0 h-[12%] pointer-events-none z-10" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 100%)' }} />
+            {!(page === 2 && !flipping) && (
+              <div className="absolute inset-y-0 right-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
+            )}
+            <div className={`absolute top-0 left-0 h-[12%] pointer-events-none z-10 ${page === 2 && !flipping ? 'w-[50%]' : 'w-full'}`} style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 100%)' }} />
           </div>
         )}
       </div>
