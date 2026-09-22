@@ -45,47 +45,44 @@ const CoverSpread = () => (
   />
 );
 
-// الـ intro: نفس الـ SVG بعرض/ارتفاع 100% زي الموقع
-const IntroSpread = ({ journey, withFields }: { journey: SavedJourney; withFields: boolean }) => {
-  const field = (top: string, value: string | undefined, size: number): React.ReactNode => (
-    <div
-      className="font-display"
-      style={{
-        position: 'absolute',
-        top,
-        left: '3.5%',
-        width: '40%',
-        height: '6.64%',
-        lineHeight: `${Math.round(PAGE_H * 0.0664)}px`, // بدل flex عشان html2canvas
-        paddingLeft: '2%',
-        paddingRight: '2%',
-        color: '#004D40',
-        fontSize: size,
-        fontWeight: 'bold',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      }}
-    >
-      {value}
-    </div>
-  );
+const BackCoverSpread = () => (
+  <div
+    style={{
+      position: 'absolute',
+      inset: 0,
+      backgroundImage: 'url(/passport-cover-hq.png)',
+      backgroundSize: '100% 100%',
+      backgroundRepeat: 'no-repeat',
+      transform: 'scaleX(-1)', // flipped horizontally
+    }}
+  />
+);
 
+const IntroPage = ({ journey }: { journey: SavedJourney }) => {
   return (
-    <>
-      <img
-        src="/passport-intro.svg"
-        alt=""
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
-      />
-      {withFields && (
-        <>
-          {field('28%', journey.player?.name, 22)}
-          {field('45.5%', journey.player?.email, 18)}
-          {field('63%', journey.player?.phone, 22)}
-        </>
-      )}
-    </>
+    <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'flex' }}>
+      {/* 
+        This is rendered inside a w: 1440 container, but the image is only for the left page.
+        Wait, Page component uses width: PAGE_W * 2, and side="left" offsets it by 0.
+        So we just render IntroPage in the left half of the 200% width container.
+      */}
+      <div style={{ width: '50%', height: '100%', position: 'relative' }}>
+        <img
+          src="/passport-intro-new.png"
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'fill' }}
+        />
+        <div style={{ position: 'absolute', top: '29.5%', left: '6.5%', width: '82%', height: '9.5%', color: '#e02424', fontSize: 28, fontWeight: 'bold', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {journey.player?.name}
+        </div>
+        <div style={{ position: 'absolute', top: '47%', left: '6.5%', width: '82%', height: '9.5%', color: '#059669', fontSize: 24, fontWeight: 'bold', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {journey.player?.email}
+        </div>
+        <div style={{ position: 'absolute', top: '64.5%', left: '6.5%', width: '82%', height: '30.5%', paddingTop: '3%', color: '#1d4ed8', fontSize: 28, fontWeight: 'bold', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflow: 'hidden' }}>
+          {journey.player?.phone}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -138,32 +135,42 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         className="flex flex-col items-center bg-white"
         style={{ width: 1440, padding: 40, gap: 40 }}
       >
-        {/* 1: الغلاف الأمامي (النص اليمين) */}
+        {/* 1: Front Cover (Right Side of cover spread) */}
         <Page side="right">
           <CoverSpread />
         </Page>
 
-        {/* 2: intro شمال (فيها البيانات) */}
+        {/* 2: Intro (Left Side) */}
         <Page side="left">
-          <IntroSpread journey={journey} withFields />
+          <IntroPage journey={journey} />
         </Page>
 
-        {/* 3: intro يمين */}
-        <Page side="right">
-          <IntroSpread journey={journey} withFields={false} />
-        </Page>
-
-        {/* 4-5: الأختام */}
+        {/* 3: Stamps 1 (Right Side) -> which is the left half of the stamps spread */}
+        {/* Wait, if it's the right side of the PDF page, we set side="right".
+            BUT StampsSpread has the left stamps on the left side of the spread.
+            If we set side="right", it will render the RIGHT half of StampsSpread.
+            Ah! We want to render the LEFT half of StampsSpread, but we want it to be a standalone page.
+            Actually, the Page component offsets the inner div.
+            If side="left", it shows the left half of the inner div.
+            If side="right", it shows the right half of the inner div.
+            The first 6 stamps are on the LEFT half of StampsSpread.
+            So to show the left half, we MUST use side="left".
+            But if we want to visually represent it as "Page 3", it doesn't matter for the PDF because the PDF is single pages!
+            We just need to capture the correct half of the spread.
+        */}
         <Page side="left">
           <StampsSpread regions={regions} journey={journey} />
         </Page>
+
+        {/* 4: Stamps 2 (Right half of the stamps spread) */}
         <Page side="right">
           <StampsSpread regions={regions} journey={journey} />
         </Page>
 
-        {/* 6: الغلاف الخلفي (النص الشمال) */}
-        <Page side="left">
-          <CoverSpread />
+        {/* 5: Back Cover (Right Side of back cover spread) */}
+        {/* To show the right side of the back cover spread, we use side="right" */}
+        <Page side="right">
+          <BackCoverSpread />
         </Page>
       </div>
     </div>
