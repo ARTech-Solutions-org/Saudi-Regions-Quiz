@@ -93,13 +93,13 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   const IntroPage = (
     <div className="w-full h-full relative overflow-hidden bg-[#F6F4EB]">
       <img src="/passport-intro-new.png" className="absolute inset-0 w-full h-full object-fill" alt="" />
-      <div className="absolute text-[#e02424] font-display text-[1.8vw] font-bold z-10 flex items-center px-[2%] whitespace-nowrap overflow-hidden text-ellipsis" style={{ top: '29.5%', left: '6.5%', width: '82%', height: '9.5%' }}>
+      <div className="absolute text-black font-display text-[1.3vw] font-bold z-10 flex items-center px-[2%] whitespace-nowrap overflow-hidden text-ellipsis" style={{ top: '29.5%', left: '6.5%', width: '82%', height: '9.5%' }}>
         {journey.player?.name}
       </div>
-      <div className="absolute text-[#059669] font-display text-[1.5vw] font-bold z-10 flex items-center px-[2%] whitespace-nowrap overflow-hidden text-ellipsis" style={{ top: '47%', left: '6.5%', width: '82%', height: '9.5%' }}>
+      <div className="absolute text-black font-display text-[1.1vw] font-bold z-10 flex items-center px-[2%] whitespace-nowrap overflow-hidden text-ellipsis" style={{ top: '47%', left: '6.5%', width: '82%', height: '9.5%' }}>
         {journey.player?.email}
       </div>
-      <div className="absolute text-[#1d4ed8] font-display text-[1.8vw] font-bold z-10 px-[2%] overflow-hidden" style={{ top: '64.5%', left: '6.5%', width: '82%', height: '30.5%', paddingTop: '3%', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+      <div className="absolute text-black font-display text-[1.3vw] font-bold z-10 px-[2%] overflow-hidden" style={{ top: '60%', left: '6.5%', width: '82%', height: '30.5%', paddingTop: '3%', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
         {journey.player?.phone}
       </div>
     </div>
@@ -151,7 +151,9 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
   const BackCoverPage = (
     <div className="w-full h-full relative overflow-hidden bg-transparent">
-      <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" style={{ transform: 'scaleX(-1)' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
+        <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
+      </div>
       <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
       <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
     </div>
@@ -224,18 +226,16 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
       {isOpen && !isGeneratingPdf && (
         <div className="mt-8 flex gap-4">
-          {page === 2 && (
-            <button onClick={generatePDF} className="bg-[#DDB572] text-[#004D40] px-6 py-2.5 rounded-full font-bold font-display hover:bg-[#c9a15b] transition-colors shadow-lg active:scale-95 flex items-center gap-2">
-              <span>PDF</span>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-            </button>
-          )}
-          {page === 2 && onResume && journey.completed.length < 14 && (
+          <button onClick={generatePDF} className="bg-[#DDB572] text-[#004D40] px-6 py-2.5 rounded-full font-bold font-display hover:bg-[#c9a15b] transition-colors shadow-lg active:scale-95 flex items-center gap-2">
+            <span>PDF</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          </button>
+          {onResume && journey.completed.length < 14 && (
             <button onClick={onResume} className="bg-[#004D40] text-white px-6 py-2.5 rounded-full font-bold font-display hover:bg-[#00382e] transition-colors shadow-lg active:scale-95">
               Resume Journey
             </button>
           )}
-          {page === 2 && onRestart && journey.completed.length === 14 && (
+          {onRestart && journey.completed.length === 14 && (
             <button onClick={onRestart} className="bg-amber-600 text-white px-6 py-2.5 rounded-full font-bold font-display hover:bg-amber-700 transition-colors shadow-lg active:scale-95">
               Play Again
             </button>

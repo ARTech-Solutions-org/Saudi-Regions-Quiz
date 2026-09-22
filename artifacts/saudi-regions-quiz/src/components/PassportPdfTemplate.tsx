@@ -32,7 +32,8 @@ const Page = ({ side, children }: { side: 'left' | 'right'; children: React.Reac
   </div>
 );
 
-// الغلاف: fill زي الموقع (object-fill)
+// الغلاف: fill زي الموقع (object-fill). نفس السبريد بيتستخدم للغلاف الأمامي (يمين)
+// والغلاف الخلفي (شمال) — من غير أي عكس/مرآة.
 const CoverSpread = () => (
   <div
     style={{
@@ -45,40 +46,69 @@ const CoverSpread = () => (
   />
 );
 
-const BackCoverSpread = () => (
-  <div
-    style={{
-      position: 'absolute',
-      inset: 0,
-      backgroundImage: 'url(/passport-cover-hq.png)',
-      backgroundSize: '100% 100%',
-      backgroundRepeat: 'no-repeat',
-      transform: 'scaleX(-1)', // flipped horizontally
-    }}
-  />
-);
-
 const IntroPage = ({ journey }: { journey: SavedJourney }) => {
   return (
     <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'flex' }}>
-      {/* 
-        This is rendered inside a w: 1440 container, but the image is only for the left page.
-        Wait, Page component uses width: PAGE_W * 2, and side="left" offsets it by 0.
-        So we just render IntroPage in the left half of the 200% width container.
-      */}
       <div style={{ width: '50%', height: '100%', position: 'relative' }}>
         <img
           src="/passport-intro-new.png"
           alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'fill' }}
         />
-        <div style={{ position: 'absolute', top: '29.5%', left: '6.5%', width: '82%', height: '9.5%', color: '#e02424', fontSize: 28, fontWeight: 'bold', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '29.5%',
+            left: '6.5%',
+            width: '82%',
+            height: '9.5%',
+            color: '#000000',
+            fontSize: 20,
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {journey.player?.name}
         </div>
-        <div style={{ position: 'absolute', top: '47%', left: '6.5%', width: '82%', height: '9.5%', color: '#059669', fontSize: 24, fontWeight: 'bold', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '47%',
+            left: '6.5%',
+            width: '82%',
+            height: '9.5%',
+            color: '#000000',
+            fontSize: 18,
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {journey.player?.email}
         </div>
-        <div style={{ position: 'absolute', top: '64.5%', left: '6.5%', width: '82%', height: '30.5%', paddingTop: '3%', color: '#1d4ed8', fontSize: 28, fontWeight: 'bold', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflow: 'hidden' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '60%',
+            left: '6.5%',
+            width: '82%',
+            height: '30.5%',
+            paddingTop: '3%',
+            color: '#000000',
+            fontSize: 20,
+            fontWeight: 'bold',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            overflow: 'hidden',
+          }}
+        >
           {journey.player?.phone}
         </div>
       </div>
@@ -129,48 +159,37 @@ const StampsSpread = ({ regions, journey }: PassportPdfTemplateProps) => (
 
 export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplateProps>(
   ({ regions, journey }, ref) => (
+    // position: fixed + left: -10000px (بدل width/height: 0) عشان iOS Safari
+    // يحسب الـ layout الداخلي صح قبل ما html2canvas يصوّر.
     <div style={{ position: 'fixed', top: 0, left: '-10000px', zIndex: -1, pointerEvents: 'none' }}>
       <div
         ref={ref}
         className="flex flex-col items-center bg-white"
         style={{ width: 1440, padding: 40, gap: 40 }}
       >
-        {/* 1: Front Cover (Right Side of cover spread) */}
+        {/* 1: الغلاف الأمامي (النص اليمين من سبريد الغلاف) */}
         <Page side="right">
           <CoverSpread />
         </Page>
 
-        {/* 2: Intro (Left Side) */}
+        {/* 2: صفحة البيانات (النص الشمال) */}
         <Page side="left">
           <IntroPage journey={journey} />
         </Page>
 
-        {/* 3: Stamps 1 (Right Side) -> which is the left half of the stamps spread */}
-        {/* Wait, if it's the right side of the PDF page, we set side="right".
-            BUT StampsSpread has the left stamps on the left side of the spread.
-            If we set side="right", it will render the RIGHT half of StampsSpread.
-            Ah! We want to render the LEFT half of StampsSpread, but we want it to be a standalone page.
-            Actually, the Page component offsets the inner div.
-            If side="left", it shows the left half of the inner div.
-            If side="right", it shows the right half of the inner div.
-            The first 6 stamps are on the LEFT half of StampsSpread.
-            So to show the left half, we MUST use side="left".
-            But if we want to visually represent it as "Page 3", it doesn't matter for the PDF because the PDF is single pages!
-            We just need to capture the correct half of the spread.
-        */}
+        {/* 3: الأختام - النص الشمال من سبريد الأختام */}
         <Page side="left">
           <StampsSpread regions={regions} journey={journey} />
         </Page>
 
-        {/* 4: Stamps 2 (Right half of the stamps spread) */}
+        {/* 4: الأختام - النص اليمين من سبريد الأختام */}
         <Page side="right">
           <StampsSpread regions={regions} journey={journey} />
         </Page>
 
-        {/* 5: Back Cover (Right Side of back cover spread) */}
-        {/* To show the right side of the back cover spread, we use side="right" */}
-        <Page side="right">
-          <BackCoverSpread />
+        {/* 5: الغلاف الخلفي = النص الشمال من نفس سبريد الغلاف (من غير عكس/مرآة) */}
+        <Page side="left">
+          <CoverSpread />
         </Page>
       </div>
     </div>
