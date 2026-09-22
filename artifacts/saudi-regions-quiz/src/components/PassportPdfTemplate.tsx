@@ -46,76 +46,6 @@ const CoverSpread = () => (
   />
 );
 
-const IntroPage = ({ journey }: { journey: SavedJourney }) => {
-  return (
-    <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'flex' }}>
-      <div style={{ width: '50%', height: '100%', position: 'relative' }}>
-        <img
-          src="/passport-intro-new.png"
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'fill' }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '27%',
-            left: '9%',
-            width: '80%',
-            height: '9.5%',
-            color: '#000000',
-            fontSize: 26,
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {journey.player?.name}
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            top: '47%',
-            left: '9%',
-            width: '80%',
-            height: '9.5%',
-            color: '#000000',
-            fontSize: 22,
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {journey.player?.email}
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            top: '64%',
-            left: '9%',
-            width: '80%',
-            height: '30.5%',
-            paddingTop: '3%',
-            color: '#000000',
-            fontSize: 26,
-            fontWeight: 'bold',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            overflow: 'hidden',
-          }}
-        >
-          {journey.player?.phone}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // صفحة الأختام: cover + scale(1.03) زي الموقع
 const StampsSpread = ({ regions, journey }: PassportPdfTemplateProps) => (
   <div style={{ position: 'absolute', inset: 0, transform: 'scale(1.03)', transformOrigin: 'center' }}>
@@ -172,22 +102,17 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
           <CoverSpread />
         </Page>
 
-        {/* 2: صفحة البيانات (النص الشمال) */}
-        <Page side="left">
-          <IntroPage journey={journey} />
-        </Page>
-
-        {/* 3: الأختام - النص الشمال من سبريد الأختام */}
+        {/* 2: الأختام - النص الشمال من سبريد الأختام */}
         <Page side="left">
           <StampsSpread regions={regions} journey={journey} />
         </Page>
 
-        {/* 4: الأختام - النص اليمين من سبريد الأختام */}
+        {/* 3: الأختام - النص اليمين من سبريد الأختام */}
         <Page side="right">
           <StampsSpread regions={regions} journey={journey} />
         </Page>
 
-        {/* 5: الغلاف الخلفي = النص الشمال من نفس سبريد الغلاف (من غير عكس/مرآة) */}
+        {/* 4: الغلاف الخلفي = النص الشمال من نفس سبريد الغلاف (من غير عكس/مرآة) */}
         <Page side="left">
           <CoverSpread />
         </Page>

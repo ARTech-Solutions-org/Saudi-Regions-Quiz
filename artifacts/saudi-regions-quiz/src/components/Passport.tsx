@@ -91,18 +91,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   };
 
   const IntroPage = (
-    <div className="w-full h-full relative overflow-hidden bg-[#F6F4EB]">
-      <img src="/passport-intro-new.png" className="absolute inset-0 w-full h-full object-fill" alt="" />
-      <div className="absolute text-black font-display text-[1.3vw] font-bold z-10 flex items-center px-[2%] whitespace-nowrap overflow-hidden text-ellipsis" style={{ top: '29.5%', left: '6.5%', width: '82%', height: '9.5%' }}>
-        {journey.player?.name}
-      </div>
-      <div className="absolute text-black font-display text-[1.1vw] font-bold z-10 flex items-center px-[2%] whitespace-nowrap overflow-hidden text-ellipsis" style={{ top: '47%', left: '6.5%', width: '82%', height: '9.5%' }}>
-        {journey.player?.email}
-      </div>
-      <div className="absolute text-black font-display text-[1.3vw] font-bold z-10 px-[2%] overflow-hidden" style={{ top: '63%', left: '6.5%', width: '82%', height: '30.5%', paddingTop: '3%', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-        {journey.player?.phone}
-      </div>
-    </div>
+    <div className="w-full h-full relative overflow-hidden bg-[#F6F4EB]" />
   );
 
   const StampsPage1 = (
