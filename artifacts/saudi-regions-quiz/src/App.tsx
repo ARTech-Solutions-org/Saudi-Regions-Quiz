@@ -459,7 +459,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                     id="welcome-saudi-word"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter a word for Saudi Arabia (كلمة للسعودية)"
+                    placeholder="Enter a word for Saudi Arabia"
                     data-testid="input-player-saudi-word"
                     aria-label="Enter a word for Saudi Arabia"
                     autoComplete="off"
