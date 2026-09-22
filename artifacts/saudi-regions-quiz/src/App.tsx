@@ -283,7 +283,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
       } else if (!email.includes('@')) {
         document.getElementById('welcome-email')?.focus();
       } else if (phone.trim().length < 2) {
-        document.getElementById('welcome-phone')?.focus();
+        document.getElementById('welcome-saudi-word')?.focus();
       }
     }
   };
@@ -453,17 +453,18 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
-                {/* Phone Input */}
+                {/* Saudi Word Input */}
                 <div>
-                  <input
-                    id="welcome-phone"
-                    type="text"
+                  <textarea
+                    id="welcome-saudi-word"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="Enter a word for Saudi Arabia (كلمة للسعودية)"
-                    data-testid="input-player-phone"
+                    data-testid="input-player-saudi-word"
                     aria-label="Enter a word for Saudi Arabia"
-                    className="font-mod box-border h-14 w-full rounded-full px-5 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px] sm:px-6 sm:text-[22px]"
+                    autoComplete="off"
+                    rows={2}
+                    className="font-mod box-border w-full rounded-2xl px-5 py-4 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:px-6 sm:text-[22px] resize-none"
                     style={{
                       fontWeight: 300,
                       lineHeight: '140%',
