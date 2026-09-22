@@ -132,7 +132,7 @@ const StampsSpread = ({ regions, journey }: PassportPdfTemplateProps) => (
 
 export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplateProps>(
   ({ regions, journey }, ref) => (
-    <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', zIndex: -1 }}>
+    <div style={{ position: 'fixed', top: 0, left: '-10000px', zIndex: -1, pointerEvents: 'none' }}>
       <div
         ref={ref}
         className="flex flex-col items-center bg-white"
