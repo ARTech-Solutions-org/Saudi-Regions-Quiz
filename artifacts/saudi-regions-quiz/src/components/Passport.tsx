@@ -173,7 +173,15 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
         onClick={() => { if (page === 0) { setIsOpen(true); setTimeout(() => setPage(1), 50); } }}
       >
         {page === 0 ? (
-          <div className="relative w-full h-full overflow-hidden rounded-r-2xl bg-transparent" style={{ cursor: 'pointer' }}>
+          <div
+            className="relative w-full h-full overflow-hidden rounded-r-2xl bg-transparent"
+            style={{
+              cursor: 'pointer',
+              transform: 'translateZ(0)',
+              WebkitTransform: 'translateZ(0)',
+              WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+            }}
+          >
             <div style={{ position: 'absolute', top: 0, right: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
               <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Passport Cover" />
             </div>
