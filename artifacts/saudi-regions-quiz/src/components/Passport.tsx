@@ -195,7 +195,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
               <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('forward')} />
             )}
             {page === 2 && !flipping && (
-              <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('backward')} />
+              <div className="absolute inset-y-0 left-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('backward')} />
             )}
 
             {page === 1 && !flipping && (
@@ -207,8 +207,8 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
             {page === 2 && !flipping && (
               <div className="absolute inset-0 flex">
-                <div className="w-1/2 h-full">{StampsPage1}</div>
                 <div className="w-1/2 h-full">{BackCoverPage}</div>
+                <div className="w-1/2 h-full">{BlankPage}</div>
               </div>
             )}
 
