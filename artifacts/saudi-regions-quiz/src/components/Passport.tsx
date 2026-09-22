@@ -35,22 +35,33 @@ export const regionCoords: Record<string, { top: string, left: string }> = {
 export function Passport({ journey, onClose, onResume, onRestart }: PassportProps) {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  // page: 0 = Front cover (مقفول، صغيّر), 1 = Open spread (أختام1 + أختام2), 2 = Open spread (أختام1 + الغلاف الخلفي)
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(0); // 0 = front closed, 1 = open stamps, 2 = back closed
   const [flipping, setFlipping] = useState<'forward' | 'backward' | null>(null);
+  const [isClosing, setIsClosing] = useState(false); // extra strong closing animation
 
-  // الحجم الكبير (السبريد) شغال طول الوقت من أول ما نفتح الباسبور —
-  // الغلاف الخلفي بيتعرض جوّه نفس السبريد (مش صندوق منفصل)، فمفيش أي
-  // تغيير حجم أو فراغ حوالين الغلاف.
-  const opened = page !== 0;
+  const opened = page === 1 || flipping !== null;
 
   const turnPage = (direction: 'forward' | 'backward') => {
-    if (flipping) return;
-    setFlipping(direction);
-    setTimeout(() => {
-      setPage(prev => direction === 'forward' ? prev + 1 : prev - 1);
-      setFlipping(null);
-    }, 800); // متزامن مع مدة أنيميشن page-turn-forward/backward (0.8s)
+    if (flipping || isClosing) return;
+
+    if (direction === 'forward' && page === 1) {
+      // أقوى تقفيلة
+      setFlipping('forward');
+      setTimeout(() => {
+        setIsClosing(true); // يبدأ الـ shrink + rotate
+        setTimeout(() => {
+          setPage(2);
+          setFlipping(null);
+          setIsClosing(false);
+        }, 600);
+      }, 750); // بعد ما اللفة تخلص تقريباً
+    } else if (direction === 'backward' && page === 2) {
+      setFlipping('backward');
+      setTimeout(() => {
+        setPage(1);
+        setFlipping(null);
+      }, 800);
+    }
   };
 
   const generatePDF = async () => {
@@ -143,7 +154,6 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
     </div>
   );
 
-  // نسخة الغلاف الخلفي المستخدمة جوّه أنيميشن القلب (طبقة ساكنة تحت الصفحة اللي بتلف)
   const BackCoverPage = (
     <div className="w-full h-full relative overflow-hidden bg-transparent">
       <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
@@ -163,12 +173,24 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <div className={`absolute transition-all duration-700 pointer-events-none rounded-full blur-3xl opacity-30 ${opened ? 'w-[80vw] max-w-5xl h-48 bg-amber-600/40 bottom-1/3' : 'w-64 h-96 bg-emerald-800/50'}`} />
 
       <div
-        className={`relative transition-all duration-700 ease-in-out ${opened ? 'w-[90%] sm:w-[80%] md:w-[70%] max-w-3xl aspect-[1440/1024]' : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'}`}
-        style={{ filter: opened ? 'drop-shadow(0 40px 60px rgba(0,0,0,0.7)) drop-shadow(0 10px 20px rgba(0,0,0,0.5))' : 'drop-shadow(-8px 8px 20px rgba(0,0,0,0.8)) drop-shadow(-2px 4px 8px rgba(0,0,0,0.6))' }}
-        onClick={() => { if (page === 0 && !flipping) { setTimeout(() => setPage(1), 50); } }}
+        className={`relative transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${opened
+            ? 'w-[90%] sm:w-[80%] md:w-[70%] max-w-3xl aspect-[1440/1024]'
+            : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'
+          } ${isClosing ? 'scale-[0.92] rotate-[-2deg]' : ''}`}
+        style={{
+          filter: opened
+            ? 'drop-shadow(0 40px 60px rgba(0,0,0,0.7)) drop-shadow(0 10px 20px rgba(0,0,0,0.5))'
+            : 'drop-shadow(-8px 8px 20px rgba(0,0,0,0.8)) drop-shadow(-2px 4px 8px rgba(0,0,0,0.6))',
+          transformOrigin: 'center center',
+        }}
+        onClick={() => {
+          if (page === 0 && !flipping && !isClosing) {
+            setTimeout(() => setPage(1), 50);
+          }
+        }}
       >
-        {page === 0 ? (
-          /* ── الغلاف الأمامي (مقفول، صغيّر) ─────────────────── */
+        {/* ── الغلاف الأمامي (مقفول) ── */}
+        {page === 0 && !flipping ? (
           <div
             className="relative w-full h-full overflow-hidden rounded-r-2xl bg-transparent"
             style={{
@@ -185,17 +207,37 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
             <div className="absolute top-0 left-0 w-full h-[30%] pointer-events-none" style={{ background: 'linear-gradient(160deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
             <div className="absolute inset-0 pointer-events-none rounded-r-2xl" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
           </div>
+        ) : page === 2 && !flipping ? (
+          /* ── الغلاف الخلفي (مقفول) - أقوى نسخة ── */
+          <div
+            className="relative w-full h-full overflow-hidden rounded-l-2xl bg-transparent cursor-pointer"
+            style={{
+              transform: 'translateZ(0)',
+              WebkitTransform: 'translateZ(0)',
+              WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+            }}
+            onClick={() => turnPage('backward')}
+          >
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
+              <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
+            </div>
+            {/* spine shadow أقوى */}
+            <div className="absolute inset-y-0 right-0 w-[10%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 45%, transparent 100%)' }} />
+            <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.08) 0%, transparent 35%, rgba(0,0,0,0.15) 100%)' }} />
+            {/* لمسة ضوء خفيفة */}
+            <div className="absolute top-0 right-0 w-full h-[25%] pointer-events-none" style={{ background: 'linear-gradient(200deg, rgba(255,255,255,0.07) 0%, transparent 60%)' }} />
+          </div>
         ) : (
-          /* ── السبريد المفتوح: صفحة 1 (أختام) أو صفحة 2 (أختام + غلاف خلفي) أو حركة القلب ── */
+          /* ── السبريد المفتوح + أنيميشن القلب ── */
           <div
             className="relative w-full h-full rounded-xl overflow-hidden"
-            style={{ perspective: 2000, WebkitPerspective: 2000 }}
+            style={{ perspective: 2200, WebkitPerspective: 2200 }}
           >
             {page === 1 && !flipping && (
-              <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('forward')} />
-            )}
-            {page === 2 && !flipping && (
-              <div className="absolute inset-y-0 left-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('backward')} />
+              <div
+                className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors"
+                onClick={() => turnPage('forward')}
+              />
             )}
 
             {page === 1 && !flipping && (
@@ -205,40 +247,46 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
               </div>
             )}
 
-            {page === 2 && !flipping && (
-              <div className="absolute inset-0 flex">
-                <div className="w-1/2 h-full">{BackCoverPage}</div>
-                <div className="w-1/2 h-full">{BlankPage}</div>
-              </div>
-            )}
-
+            {/* تقليب للأمام (آخر صفحة) */}
             {flipping === 'forward' && (
               <>
                 <div className="absolute top-0 left-0 w-[50%] h-full overflow-hidden">{StampsPage1}</div>
-                <div className="absolute top-0 right-0 w-[50%] h-full overflow-hidden">{BlankPage}</div>
-                <div className="absolute top-0 left-[50%] w-[50%] h-full z-40 page-turn-forward" style={{ transformStyle: 'preserve-3d', transformOrigin: 'left center' }}>
+                <div className="absolute top-0 right-0 w-[50%] h-full overflow-hidden">{BackCoverPage}</div>
+                <div
+                  className="absolute top-0 left-[50%] w-[50%] h-full z-40 page-turn-forward"
+                  style={{ transformStyle: 'preserve-3d', transformOrigin: 'left center' }}
+                >
                   <div className="absolute inset-0 overflow-hidden backface-hidden">{StampsPage2}</div>
-                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>{BackCoverPage}</div>
+                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>
+                    {BlankPage}
+                  </div>
                 </div>
               </>
             )}
 
+            {/* تقليب للخلف */}
             {flipping === 'backward' && (
               <>
                 <div className="absolute top-0 left-0 w-[50%] h-full overflow-hidden">{StampsPage1}</div>
-                <div className="absolute top-0 right-0 w-[50%] h-full overflow-hidden">{BlankPage}</div>
-                <div className="absolute top-0 left-0 w-[50%] h-full z-40 page-turn-backward" style={{ transformStyle: 'preserve-3d', transformOrigin: 'right center' }}>
-                  <div className="absolute inset-0 overflow-hidden backface-hidden">{BackCoverPage}</div>
-                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>{StampsPage2}</div>
+                <div className="absolute top-0 right-0 w-[50%] h-full overflow-hidden">{BackCoverPage}</div>
+                <div
+                  className="absolute top-0 left-0 w-[50%] h-full z-40 page-turn-backward"
+                  style={{ transformStyle: 'preserve-3d', transformOrigin: 'right center' }}
+                >
+                  <div className="absolute inset-0 overflow-hidden backface-hidden">{BlankPage}</div>
+                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>
+                    {StampsPage2}
+                  </div>
                 </div>
               </>
             )}
 
+            {/* الظلال الداخلية */}
             <div className="absolute inset-y-0 left-[49.5%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
-            <div className={`absolute inset-y-0 left-[50%] w-[1%] pointer-events-none z-10 transition-opacity duration-300 ${page === 2 || (flipping === 'forward') ? 'opacity-0' : 'opacity-100'}`} style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
+            <div className="absolute inset-y-0 left-[50%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
             <div className="absolute inset-y-0 left-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
-            <div className={`absolute inset-y-0 right-0 w-[3%] pointer-events-none z-10 transition-opacity duration-300 ${page === 2 || (flipping === 'forward') ? 'opacity-0' : 'opacity-100'}`} style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
-            <div className={`absolute top-0 left-0 h-[12%] pointer-events-none z-10 transition-all duration-300 ${page === 2 || (flipping === 'forward') ? 'w-[50%]' : 'w-full'}`} style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 100%)' }} />
+            <div className="absolute inset-y-0 right-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
+            <div className="absolute top-0 left-0 w-full h-[12%] pointer-events-none z-10" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 100%)' }} />
           </div>
         )}
       </div>
