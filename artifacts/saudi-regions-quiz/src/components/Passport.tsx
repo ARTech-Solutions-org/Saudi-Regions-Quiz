@@ -154,13 +154,12 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
     </div>
   );
 
-  // الغلاف الخلفي — بيتعرض كمستطيل "بوكية" بنسبته الطبيعية (زي الغلاف المقفول)
-  // في نص الإطار الكبير، بدل ما يتمطّ على عرض الإطار كله (وده كان يشوّه
-  // النص والزخارف لأن تصميم الغلاف أصلًا بورتريه مش لاندسكيب).
+  // الغلاف الخلفي — بيتعرض بنفس طريقة الغلاف الأمامي بالظبط (نفس القصّة من
+  // نفس الصورة)، جوّه مستطيل بورتريه متمركز في نص الإطار الكبير.
   const BackCoverFull = (
     <div className="absolute inset-0 flex items-center justify-center">
       <div
-        className="relative h-full aspect-[255/354] cursor-pointer rounded-l-2xl overflow-hidden"
+        className="relative h-full aspect-[255/354] cursor-pointer rounded-2xl overflow-hidden"
         style={{
           transform: 'translateZ(0)',
           WebkitTransform: 'translateZ(0)',
@@ -173,7 +172,8 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
           <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
         </div>
         <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
-        <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
+        <div className="absolute top-0 right-0 w-full h-[30%] pointer-events-none" style={{ background: 'linear-gradient(-160deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
+        <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
       </div>
     </div>
   );
