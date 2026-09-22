@@ -226,17 +226,17 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
       {isOpen && !isGeneratingPdf && (
         <div className="mt-8 flex gap-4">
-          <button onClick={generatePDF} className="bg-[#DDB572] text-[#004D40] px-6 py-2.5 rounded-full font-bold font-display hover:bg-[#c9a15b] transition-colors shadow-lg active:scale-95 flex items-center gap-2">
+          <button onClick={generatePDF} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-full font-bold font-display hover:bg-accent/90 transition-colors shadow-lg active:scale-95 flex items-center gap-2">
             <span>PDF</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
           </button>
           {onResume && journey.completed.length < 14 && (
-            <button onClick={onResume} className="bg-[#004D40] text-white px-6 py-2.5 rounded-full font-bold font-display hover:bg-[#00382e] transition-colors shadow-lg active:scale-95">
+            <button onClick={onResume} className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full font-bold font-display hover:bg-primary/90 transition-colors shadow-lg active:scale-95">
               Resume Journey
             </button>
           )}
           {onRestart && journey.completed.length === 14 && (
-            <button onClick={onRestart} className="bg-amber-600 text-white px-6 py-2.5 rounded-full font-bold font-display hover:bg-amber-700 transition-colors shadow-lg active:scale-95">
+            <button onClick={onRestart} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-full font-bold font-display hover:bg-accent/90 transition-colors shadow-lg active:scale-95">
               Play Again
             </button>
           )}
