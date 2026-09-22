@@ -96,7 +96,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   };
 
   const BlankPage = (
-    <div className="w-full h-full relative overflow-hidden bg-[#F6F4EB]" />
+    <div className="w-full h-full relative overflow-hidden bg-transparent" />
   );
 
   const StampsPage1 = (
@@ -188,7 +188,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
         ) : (
           /* ── السبريد المفتوح: صفحة 1 (أختام) أو صفحة 2 (أختام + غلاف خلفي) أو حركة القلب ── */
           <div
-            className="relative w-full h-full rounded-xl overflow-hidden bg-[#F6F4EB]"
+            className="relative w-full h-full rounded-xl overflow-hidden"
             style={{ perspective: 2000, WebkitPerspective: 2000 }}
           >
             {page === 1 && !flipping && (
