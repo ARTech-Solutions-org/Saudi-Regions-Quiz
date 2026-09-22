@@ -35,14 +35,12 @@ export const regionCoords: Record<string, { top: string, left: string }> = {
 export function Passport({ journey, onClose, onResume, onRestart }: PassportProps) {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  // page: 0 = Front cover (closed, صغيّر), 1 = Open spread (stamps), 2 = Back cover (مقفول لكن جوّه نفس الإطار الكبير)
+  // page: 0 = Front cover (مقفول، صغيّر), 1 = Open spread (stamps), 2 = Back cover (مقفول، صغيّر)
   const [page, setPage] = useState(0);
   const [flipping, setFlipping] = useState<'forward' | 'backward' | null>(null);
 
-  // الحجم الكبير (السبريد) بيفضل شغال طول الوقت من أول ما نفتح الباسبور —
-  // مفيش رجوع للحجم الصغير تاني غير الحالة الابتدائية (page 0)، عشان منتجنبش
-  // أي تغيير حجم أثناء/بعد حركة القلب (وده كان سبب التمطيط والفلاش).
-  const expanded = page !== 0;
+  // الحجم الكبير (السبريد) شغال بس وانت في صفحة الأختام أو أثناء حركة القلب.
+  const expanded = page === 1 || flipping !== null;
 
   const turnPage = (direction: 'forward' | 'backward') => {
     if (flipping) return;
@@ -143,7 +141,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
     </div>
   );
 
-  // الغلاف الخلفي — نسخة "نص صفحة" بتتستخدم كطبقة ساكنة جوّه حركة القلب
+  // نسخة الغلاف الخلفي المستخدمة جوّه أنيميشن القلب (طبقة ساكنة تحت الصفحة اللي بتلف)
   const BackCoverPage = (
     <div className="w-full h-full relative overflow-hidden bg-transparent">
       <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
@@ -151,30 +149,6 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       </div>
       <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
       <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
-    </div>
-  );
-
-  // الغلاف الخلفي — بيتعرض بنفس طريقة الغلاف الأمامي بالظبط (نفس القصّة من
-  // نفس الصورة)، جوّه مستطيل بورتريه متمركز في نص الإطار الكبير.
-  const BackCoverFull = (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div
-        className="relative h-full aspect-[255/354] cursor-pointer rounded-2xl overflow-hidden"
-        style={{
-          transform: 'translateZ(0)',
-          WebkitTransform: 'translateZ(0)',
-          WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-          filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
-        }}
-        onClick={() => turnPage('backward')}
-      >
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
-          <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
-        </div>
-        <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
-        <div className="absolute top-0 right-0 w-full h-[30%] pointer-events-none" style={{ background: 'linear-gradient(-160deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
-        <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
-      </div>
     </div>
   );
 
@@ -189,7 +163,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <div
         className={`relative transition-all duration-700 ease-in-out ${expanded ? 'w-[90%] sm:w-[80%] md:w-[70%] max-w-3xl aspect-[1440/1024]' : 'w-[58%] max-w-[220px] aspect-[255/354] cursor-pointer sm:w-[40%] sm:max-w-xs'}`}
         style={{ filter: expanded ? 'drop-shadow(0 40px 60px rgba(0,0,0,0.7)) drop-shadow(0 10px 20px rgba(0,0,0,0.5))' : 'drop-shadow(-8px 8px 20px rgba(0,0,0,0.8)) drop-shadow(-2px 4px 8px rgba(0,0,0,0.6))' }}
-        onClick={() => { if (page === 0) { setTimeout(() => setPage(1), 50); } }}
+        onClick={() => { if (page === 0 && !flipping) { setTimeout(() => setPage(1), 50); } }}
       >
         {page === 0 ? (
           /* ── الغلاف الأمامي (مقفول، صغيّر) ─────────────────── */
@@ -209,17 +183,30 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
             <div className="absolute top-0 left-0 w-full h-[30%] pointer-events-none" style={{ background: 'linear-gradient(160deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
             <div className="absolute inset-0 pointer-events-none rounded-r-2xl" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
           </div>
-        ) : (
-          /* ── الإطار الكبير: سبريد مفتوح / حركة قلب / غلاف خلفي — كله نفس الحجم ── */
+        ) : page === 2 && !flipping ? (
+          /* ── الغلاف الخلفي (مقفول، صغيّر) — دوسة عليه ترجّع تفتح ── */
           <div
-            className="relative w-full h-full rounded-xl overflow-hidden bg-[#F6F4EB]"
+            className="relative w-full h-full overflow-hidden rounded-l-2xl bg-transparent"
             style={{
-              perspective: 2000,
-              WebkitPerspective: 2000,
+              cursor: 'pointer',
               transform: 'translateZ(0)',
               WebkitTransform: 'translateZ(0)',
               WebkitMaskImage: '-webkit-radial-gradient(white, black)',
             }}
+            onClick={() => turnPage('backward')}
+          >
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
+              <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
+            </div>
+            <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
+            <div className="absolute top-0 right-0 w-full h-[30%] pointer-events-none" style={{ background: 'linear-gradient(-160deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
+            <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
+          </div>
+        ) : (
+          /* ── السبريد المفتوح (صفحة 1) أو حركة القلب ─────── */
+          <div
+            className="relative w-full h-full rounded-xl overflow-hidden bg-[#F6F4EB]"
+            style={{ perspective: 2000, WebkitPerspective: 2000 }}
           >
             {page === 1 && !flipping && (
               <div className="absolute inset-y-0 right-0 w-1/2 cursor-pointer z-50 hover:bg-black/5 transition-colors" onClick={() => turnPage('forward')} />
@@ -231,8 +218,6 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
                 <div className="w-1/2 h-full">{StampsPage2}</div>
               </div>
             )}
-
-            {page === 2 && !flipping && BackCoverFull}
 
             {flipping === 'forward' && (
               <>
@@ -256,15 +241,11 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
               </>
             )}
 
-            {(page === 1 || flipping) && (
-              <>
-                <div className="absolute inset-y-0 left-[49.5%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
-                <div className="absolute inset-y-0 left-[50%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
-                <div className="absolute inset-y-0 left-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
-                <div className="absolute inset-y-0 right-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
-                <div className="absolute top-0 inset-x-0 h-[12%] pointer-events-none z-10" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 100%)' }} />
-              </>
-            )}
+            <div className="absolute inset-y-0 left-[49.5%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
+            <div className="absolute inset-y-0 left-[50%] w-[1%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.07) 40%, transparent 100%)' }} />
+            <div className="absolute inset-y-0 left-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
+            <div className="absolute inset-y-0 right-0 w-[3%] pointer-events-none z-10" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, transparent 100%)' }} />
+            <div className="absolute top-0 inset-x-0 h-[12%] pointer-events-none z-10" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 100%)' }} />
           </div>
         )}
       </div>
