@@ -154,18 +154,27 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
     </div>
   );
 
-  // الغلاف الخلفي — نسخة "الصفحة كاملة" بتتستخدم لما الباسبور يبقى مقفول
-  // على الظهر (جوّه نفس الإطار الكبير، بدون أي تغيير حجم)
+  // الغلاف الخلفي — بيتعرض كمستطيل "بوكية" بنسبته الطبيعية (زي الغلاف المقفول)
+  // في نص الإطار الكبير، بدل ما يتمطّ على عرض الإطار كله (وده كان يشوّه
+  // النص والزخارف لأن تصميم الغلاف أصلًا بورتريه مش لاندسكيب).
   const BackCoverFull = (
-    <div
-      className="absolute inset-0 cursor-pointer"
-      style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
-      onClick={() => turnPage('backward')}
-    >
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
-        <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div
+        className="relative h-full aspect-[255/354] cursor-pointer rounded-l-2xl overflow-hidden"
+        style={{
+          transform: 'translateZ(0)',
+          WebkitTransform: 'translateZ(0)',
+          WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+          filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
+        }}
+        onClick={() => turnPage('backward')}
+      >
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
+          <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
+        </div>
+        <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
+        <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
       </div>
-      <div className="absolute top-0 inset-x-0 h-[12%] pointer-events-none z-10" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 100%)' }} />
     </div>
   );
 
