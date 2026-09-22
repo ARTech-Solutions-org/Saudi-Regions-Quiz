@@ -222,7 +222,7 @@ function AdminDashboard() {
                   <th className="py-3 px-4 font-bold">Rank</th>
                   <th className="py-3 px-4 font-bold">Name</th>
                   <th className="py-3 px-4 font-bold">Email</th>
-                  <th className="py-3 px-4 font-bold">Phone</th>
+                  <th className="py-3 px-4 font-bold">Word for Saudi</th>
                   <th className="py-3 px-4 font-bold text-center">Regions (14)</th>
                   <th className="py-3 px-4 font-bold text-center">Score</th>
                   <th className="py-3 px-4 font-bold text-right">Time Taken</th>
@@ -270,7 +270,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
   const [phone, setPhone] = useState(journey.player?.phone ?? '');
   const [touched, setTouched] = useState(false);
   const hasResume = Boolean(journey.player);
-  const valid = name.trim().length > 1 && email.includes('@') && phone.trim().length >= 8;
+  const valid = name.trim().length > 1 && email.includes('@') && phone.trim().length >= 2;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -282,7 +282,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
         document.getElementById('welcome-name')?.focus();
       } else if (!email.includes('@')) {
         document.getElementById('welcome-email')?.focus();
-      } else if (phone.trim().length < 8) {
+      } else if (phone.trim().length < 2) {
         document.getElementById('welcome-phone')?.focus();
       }
     }
@@ -457,19 +457,19 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                 <div>
                   <input
                     id="welcome-phone"
-                    type="tel"
+                    type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter your phone number"
+                    placeholder="Enter a word for Saudi Arabia (كلمة للسعودية)"
                     data-testid="input-player-phone"
-                    aria-label="Enter your phone number"
+                    aria-label="Enter a word for Saudi Arabia"
                     className="font-mod box-border h-14 w-full rounded-full px-5 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:h-[60px] sm:px-6 sm:text-[22px]"
                     style={{
                       fontWeight: 300,
                       lineHeight: '140%',
                       color: '#000000',
                       letterSpacing: 0,
-                      border: touched && phone.trim().length < 8 ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
+                      border: touched && phone.trim().length < 2 ? '1.5px solid #d9383a' : '1.08px solid #A1A1A1',
                       backgroundColor: '#ffffff',
                     }}
                     onFocus={(e) => {
@@ -477,7 +477,7 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                       e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 76, 66, 0.15)';
                     }}
                     onBlur={(e) => {
-                      e.currentTarget.style.borderColor = touched && phone.trim().length < 8 ? '#d9383a' : '#A1A1A1';
+                      e.currentTarget.style.borderColor = touched && phone.trim().length < 2 ? '#d9383a' : '#A1A1A1';
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
