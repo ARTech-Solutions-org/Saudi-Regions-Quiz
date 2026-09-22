@@ -90,7 +90,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
     }
   };
 
-  const IntroPage = (
+  const BlankPage = (
     <div className="w-full h-full relative overflow-hidden bg-[#F6F4EB]" />
   );
 
@@ -188,29 +188,29 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
 
             {!flipping && (
               <div className="absolute inset-0 flex">
-                <div className="w-1/2 h-full">{page === 1 ? IntroPage : StampsPage2}</div>
-                <div className="w-1/2 h-full">{page === 1 ? StampsPage1 : BackCoverPage}</div>
+                <div className="w-1/2 h-full">{page === 1 ? StampsPage1 : BlankPage}</div>
+                <div className="w-1/2 h-full">{page === 1 ? StampsPage2 : BackCoverPage}</div>
               </div>
             )}
 
             {flipping === 'forward' && (
               <>
-                <div className="absolute top-0 left-0 w-[50%] h-full overflow-hidden">{IntroPage}</div>
+                <div className="absolute top-0 left-0 w-[50%] h-full overflow-hidden">{StampsPage1}</div>
                 <div className="absolute top-0 right-0 w-[50%] h-full overflow-hidden">{BackCoverPage}</div>
                 <div className="absolute top-0 left-[50%] w-[50%] h-full z-40 page-turn-forward" style={{ transformStyle: 'preserve-3d', transformOrigin: 'left center' }}>
-                  <div className="absolute inset-0 overflow-hidden backface-hidden">{StampsPage1}</div>
-                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>{StampsPage2}</div>
+                  <div className="absolute inset-0 overflow-hidden backface-hidden">{StampsPage2}</div>
+                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>{BlankPage}</div>
                 </div>
               </>
             )}
 
             {flipping === 'backward' && (
               <>
-                <div className="absolute top-0 left-0 w-[50%] h-full overflow-hidden">{IntroPage}</div>
+                <div className="absolute top-0 left-0 w-[50%] h-full overflow-hidden">{StampsPage1}</div>
                 <div className="absolute top-0 right-0 w-[50%] h-full overflow-hidden">{BackCoverPage}</div>
                 <div className="absolute top-0 left-0 w-[50%] h-full z-40 page-turn-backward" style={{ transformStyle: 'preserve-3d', transformOrigin: 'right center' }}>
-                  <div className="absolute inset-0 overflow-hidden backface-hidden">{StampsPage2}</div>
-                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>{StampsPage1}</div>
+                  <div className="absolute inset-0 overflow-hidden backface-hidden">{BlankPage}</div>
+                  <div className="absolute inset-0 overflow-hidden backface-hidden" style={{ transform: 'rotateY(180deg)' }}>{StampsPage2}</div>
                 </div>
               </>
             )}
