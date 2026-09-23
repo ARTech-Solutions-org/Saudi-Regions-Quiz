@@ -12,9 +12,6 @@ const PAGE_W = 720;
 const PAGE_H = 1024; // الـ spread = 1440 × 1024 زي الموقع بالظبط
 const PAGE_BG = '#f3f2ed'; // لون خلفية الـ PDF
 
-// ⚠️ لازم يكون نفس اسم الفونت المستخدم فعليًا في class="font-display" بتاعتك
-const MESSAGE_FONT_FAMILY = "'Your Display Font', sans-serif";
-
 // حدود صندوق الرسالة على الغلاف الخلفي (نفس النسب: top:86% left:10% width:80% height:11%)
 const MESSAGE_BOX = {
   top: 0.86 * PAGE_H,
@@ -23,9 +20,47 @@ const MESSAGE_BOX = {
   height: 0.11 * PAGE_H,
 };
 
+// بيستنى الخطوط تخلص تحميل فعليًا (مش بس تتحمل، لكن تبقى جاهزة للاستخدام).
+// ده بيتحل هنا كـ state عشان أي حساب هيعتمد عليه يتعمل من تاني بعد الجاهزية،
+// مش يتحسب مرة واحدة بس وقت أول render (لما الخط لسه ممكن يكون مش جاهز).
+function useFontsReady() {
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => {
+    let cancelled = false;
+    if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        if (!cancelled) setReady(true);
+      });
+    } else {
+      setReady(true);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return ready;
+}
+
+// بيجيب الـ font-family الفعلي المطبّق على أي className (زي 'font-display')
+// من الصفحة نفسها، بدل ما نكتب اسم الخط يدويًا وممكن نغلط فيه أو ننساه.
+function getResolvedFontFamily(className: string, fontWeight: string): string {
+  if (typeof document === 'undefined') return 'sans-serif';
+  const probe = document.createElement('span');
+  probe.className = className;
+  probe.style.position = 'fixed';
+  probe.style.visibility = 'hidden';
+  probe.style.pointerEvents = 'none';
+  probe.style.left = '-9999px';
+  probe.style.fontWeight = fontWeight;
+  probe.textContent = 'x';
+  document.body.appendChild(probe);
+  const family = getComputedStyle(probe).fontFamily || 'sans-serif';
+  document.body.removeChild(probe);
+  return family;
+}
+
 // بيقسم النص على أسطر بحيث كل سطر يدخل جوّه عرض الصندوق.
-// لو كلمة كاملة أطول من عرض الصندوق (زي نص من غير أي فراغات) بيكسرها
-// حرف بحرف عشان تفضل جوّه الصندوق برضو.
+// لو كلمة كاملة (أو نص من غير أي فراغات) أطول من عرض الصندوق، بيكسرها حرف بحرف.
 function wrapAtSize(
   text: string,
   size: number,
@@ -48,7 +83,6 @@ function wrapAtSize(
       continue;
     }
 
-    // الكلمة الجديدة خلّت السطر يطلع بره العرض — نقفل السطر الحالي
     if (current) {
       lines.push(current);
       current = '';
@@ -57,8 +91,6 @@ function wrapAtSize(
     if (fits(word)) {
       current = word;
     } else {
-      // الكلمة نفسها أطول من عرض الصندوق (زي نص من غير فراغات) —
-      // نكسرها حرف بحرف
       let chunk = '';
       for (const ch of word) {
         const trial = chunk + ch;
@@ -82,15 +114,15 @@ function wrapAndFitText(
   boxWidth: number,
   boxHeight: number,
   opts: {
-    fontFamily?: string;
+    fontFamily: string;
     fontWeight?: string;
     maxFontSize?: number;
     minFontSize?: number;
     lineHeightRatio?: number;
-  } = {}
+  }
 ): { fontSize: number; lines: string[] } {
   const {
-    fontFamily = 'sans-serif',
+    fontFamily,
     fontWeight = '700',
     maxFontSize = 32,
     minFontSize = 10,
@@ -105,8 +137,6 @@ function wrapAndFitText(
   const ctx = canvas.getContext('2d');
   if (!ctx) return { fontSize: minFontSize, lines: [text] };
 
-  // بننزل الحجم تدريجيًا لحد ما كل الأسطر (بعد الكسر عند الحاجة) تتظبط
-  // جوّه ارتفاع الصندوق. العرض مضمون دايمًا لأن wrapAtSize بيكسر أي حاجة أطول من العرض.
   for (let size = maxFontSize; size >= minFontSize; size -= 0.5) {
     const lines = wrapAtSize(text, size, boxWidth, ctx, fontFamily, fontWeight);
     const totalHeight = lines.length * size * lineHeightRatio;
@@ -119,17 +149,21 @@ function wrapAndFitText(
 }
 
 function FittedMessage({ text }: { text: string }) {
-  const { fontSize, lines } = React.useMemo(
-    () =>
-      wrapAndFitText(text, MESSAGE_BOX.width, MESSAGE_BOX.height, {
-        fontFamily: MESSAGE_FONT_FAMILY,
-        fontWeight: '700',
-        maxFontSize: 32,
-        minFontSize: 10,
-        lineHeightRatio: 1.25,
-      }),
-    [text]
-  );
+  const fontsReady = useFontsReady();
+
+  const { fontSize, lines } = React.useMemo(() => {
+    // لحد ما الخطوط تخلص تحميل، منحسبش حاجة نهائية — نرجع قيمة مبدئية بسيطة
+    // (مش هتتعرض أصلًا لأن opacity هتبقى 0 لحد ما fontsReady تتحقق، بص تحت).
+    const fontFamily = getResolvedFontFamily('font-display', '700');
+    return wrapAndFitText(text, MESSAGE_BOX.width, MESSAGE_BOX.height, {
+      fontFamily,
+      fontWeight: '700',
+      maxFontSize: 32,
+      minFontSize: 10,
+      lineHeightRatio: 1.25,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, fontsReady]); // ← بيتحسب تاني أول ما الخطوط تخلص تحميل فعليًا
 
   return (
     <div
@@ -146,12 +180,14 @@ function FittedMessage({ text }: { text: string }) {
         overflow: 'hidden',
         textAlign: 'center',
         color: '#7CFFB2',
-        fontFamily: MESSAGE_FONT_FAMILY,
-        fontWeight: 700,
+        // مخفي لحد ما الحساب يتم بالخط الصح، عشان html2canvas متاخدش صورة
+        // للنص وهو لسه متحسب بخط بديل غلط
+        opacity: fontsReady ? 1 : 0,
       }}
+      className="font-display"
     >
       {lines.map((line, i) => (
-        <div key={i} style={{ fontSize, lineHeight: 1.25, maxWidth: '100%', overflow: 'hidden' }}>
+        <div key={i} style={{ fontSize, fontWeight: 700, lineHeight: 1.25, maxWidth: '100%', overflow: 'hidden' }}>
           {line}
         </div>
       ))}
