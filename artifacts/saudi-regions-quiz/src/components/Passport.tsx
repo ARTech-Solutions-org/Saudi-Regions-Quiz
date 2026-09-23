@@ -144,14 +144,15 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   );
 
   // نسخة الغلاف الخلفي المستخدمة جوّه أنيميشن القلب (طبقة ساكنة تحت الصفحة اللي بتلف)
+  // نسخة الغلاف الخلفي المستخدمة جوّه أنيميشن القلب (طبقة ساكنة تحت الصفحة اللي بتلف)
   const BackCoverPage = (
     <div className="w-full h-full relative overflow-hidden bg-transparent">
       <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
         <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
       </div>
 
-      {/* رسالة اليوزر (متخزنة في عمود phone) */}
-      {journey.phone && (
+      {/* رسالة اليوزر (متخزنة في phone جوه player) */}
+      {journey.player?.phone && (
         <div
           className="absolute z-30 flex items-center justify-center text-center"
           style={{ top: '86%', left: '10%', width: '80%', height: '11%' }}
@@ -160,7 +161,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
             className="font-display text-[#7CFFB2] leading-snug break-words"
             style={{ fontSize: 'clamp(9px, 2vw, 15px)' }}
           >
-            {journey.phone}
+            {journey.player.phone}
           </p>
         </div>
       )}
@@ -169,7 +170,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
     </div>
   );
-
+  
   return (
     <div className="overlay-in fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <button onClick={onClose} className="absolute top-6 right-6 text-white text-4xl hover:scale-110 transition-transform z-50">
