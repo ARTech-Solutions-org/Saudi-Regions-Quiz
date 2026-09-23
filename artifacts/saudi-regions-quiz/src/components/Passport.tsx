@@ -125,6 +125,13 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
     setIsGeneratingPdf(true);
 
     try {
+      // بيستنى كل الخطوط تخلص تحميل فعليًا قبل ما ناخد أي صورة —
+      // مهم جدًا على آيفون/سفاري لأن تأخير تحميل الخط بيخلي html2canvas
+      // ياخد الصورة بخط احتياطي (fallback) بدل الخط الحقيقي.
+      if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'px',
@@ -354,4 +361,4 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <PassportPdfTemplate ref={pdfRef} regions={regions} journey={journey} />
     </div>
   );
-              }
+    }
