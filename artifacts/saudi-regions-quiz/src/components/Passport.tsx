@@ -149,6 +149,22 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
         <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
       </div>
+
+      {/* رسالة اليوزر (متخزنة في عمود phone) */}
+      {journey.phone && (
+        <div
+          className="absolute z-30 flex items-center justify-center text-center"
+          style={{ top: '86%', left: '10%', width: '80%', height: '11%' }}
+        >
+          <p
+            className="font-display text-[#7CFFB2] leading-snug break-words"
+            style={{ fontSize: 'clamp(9px, 2vw, 15px)' }}
+          >
+            {journey.phone}
+          </p>
+        </div>
+      )}
+
       <div className="absolute inset-y-0 right-0 w-[8%] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)' }} />
       <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
     </div>
@@ -271,4 +287,4 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <PassportPdfTemplate ref={pdfRef} regions={regions} journey={journey} />
     </div>
   );
-}
+          }
