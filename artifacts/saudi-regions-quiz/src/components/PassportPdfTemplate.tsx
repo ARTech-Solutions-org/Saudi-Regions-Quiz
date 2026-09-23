@@ -152,18 +152,16 @@ function FittedMessage({ text }: { text: string }) {
   const fontsReady = useFontsReady();
 
   const { fontSize, lines } = React.useMemo(() => {
-    // لحد ما الخطوط تخلص تحميل، منحسبش حاجة نهائية — نرجع قيمة مبدئية بسيطة
-    // (مش هتتعرض أصلًا لأن opacity هتبقى 0 لحد ما fontsReady تتحقق، بص تحت).
     const fontFamily = getResolvedFontFamily('font-display', '700');
     return wrapAndFitText(text, MESSAGE_BOX.width, MESSAGE_BOX.height, {
       fontFamily,
       fontWeight: '700',
       maxFontSize: 32,
-      minFontSize: 10,
-      lineHeightRatio: 1.25,
+      minFontSize: 8,          // ← نزّلنا الحد الأدنى شوية كهامش أمان إضافي
+      lineHeightRatio: 1.3,    // ← زودناها شوية عشان تاخد بالها من الحروف اللي ليها ذيل (g, y, j...)
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, fontsReady]); // ← بيتحسب تاني أول ما الخطوط تخلص تحميل فعليًا
+  }, [text, fontsReady]);
 
   return (
     <div
@@ -176,25 +174,23 @@ function FittedMessage({ text }: { text: string }) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
+        justifyContent: 'flex-start',  // ← بدل center: يبدأ من فوق دايمًا، مش يتلزّق ويقطع
+        overflow: 'visible',           // ← بدل hidden: مفيش قص خالص، لأننا ضامنين الحجم صح من الحساب
         textAlign: 'center',
         color: '#7CFFB2',
-        // مخفي لحد ما الحساب يتم بالخط الصح، عشان html2canvas متاخدش صورة
-        // للنص وهو لسه متحسب بخط بديل غلط
         opacity: fontsReady ? 1 : 0,
       }}
       className="font-display"
     >
       {lines.map((line, i) => (
-        <div key={i} style={{ fontSize, fontWeight: 700, lineHeight: 1.25, maxWidth: '100%', overflow: 'hidden' }}>
+        <div key={i} style={{ fontSize, fontWeight: 700, lineHeight: 1.3, maxWidth: '100%' }}>
           {line}
         </div>
       ))}
     </div>
   );
 }
-
+  
 // صفحة واحدة = نص الـ spread (يمين أو شمال)
 const Page = ({ side, children }: { side: 'left' | 'right'; children: React.ReactNode }) => (
   <div
