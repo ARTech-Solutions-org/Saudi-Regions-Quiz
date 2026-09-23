@@ -12,6 +12,123 @@ const PAGE_W = 720;
 const PAGE_H = 1024; // الـ spread = 1440 × 1024 زي الموقع بالظبط
 const PAGE_BG = '#f3f2ed'; // لون خلفية الـ PDF
 
+// ⚠️ لازم يكون نفس اسم الفونت المستخدم فعليًا في class="font-display" بتاعتك
+// (شوف تعريفه في tailwind.config أو الـ CSS، وحط نفس الاسم هنا بالظبط)
+const MESSAGE_FONT_FAMILY = "'Your Display Font', sans-serif";
+
+// حدود صندوق الرسالة على الغلاف الخلفي (نفس النسب اللي في Passport.tsx: top:86% left:10% width:80% height:11%)
+const MESSAGE_BOX = {
+  top: 0.86 * PAGE_H,
+  left: 0.10 * PAGE_W,
+  width: 0.80 * PAGE_W,
+  height: 0.11 * PAGE_H,
+};
+
+// بيحسب حجم الفونت المناسب وتقسيم النص على أسطر بشكل متزامن (من غير useEffect/ResizeObserver)
+// عشان يشتغل صح مع html2canvas حتى لو الصورة اتاخدت فورًا بعد الـ render.
+function wrapAndFitText(
+  text: string,
+  boxWidth: number,
+  boxHeight: number,
+  opts: {
+    fontFamily?: string;
+    fontWeight?: string;
+    maxFontSize?: number;
+    minFontSize?: number;
+    lineHeightRatio?: number;
+  } = {}
+): { fontSize: number; lines: string[] } {
+  const {
+    fontFamily = 'sans-serif',
+    fontWeight = '700',
+    maxFontSize = 32,
+    minFontSize = 12,
+    lineHeightRatio = 1.25,
+  } = opts;
+
+  // حماية لو الكود اتنفذ في بيئة من غير document (SSR مثلاً)
+  if (typeof document === 'undefined') {
+    return { fontSize: minFontSize, lines: [text] };
+  }
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return { fontSize: minFontSize, lines: [text] };
+
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return { fontSize: maxFontSize, lines: [] };
+
+  const wrapAtSize = (size: number): string[] => {
+    ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+    const lines: string[] = [];
+    let current = '';
+
+    for (const word of words) {
+      const trial = current ? `${current} ${word}` : word;
+      if (ctx.measureText(trial).width <= boxWidth || !current) {
+        current = trial;
+      } else {
+        lines.push(current);
+        current = word;
+      }
+    }
+    if (current) lines.push(current);
+    return lines;
+  };
+
+  // بننزل الحجم تدريجيًا لحد ما كل الأسطر تتظبط جوّه ارتفاع الصندوق
+  for (let size = maxFontSize; size >= minFontSize; size -= 0.5) {
+    const lines = wrapAtSize(size);
+    const totalHeight = lines.length * size * lineHeightRatio;
+    if (totalHeight <= boxHeight) {
+      return { fontSize: size, lines };
+    }
+  }
+
+  return { fontSize: minFontSize, lines: wrapAtSize(minFontSize) };
+}
+
+function FittedMessage({ text }: { text: string }) {
+  const { fontSize, lines } = React.useMemo(
+    () =>
+      wrapAndFitText(text, MESSAGE_BOX.width, MESSAGE_BOX.height, {
+        fontFamily: MESSAGE_FONT_FAMILY,
+        fontWeight: '700',
+        maxFontSize: 32,
+        minFontSize: 12,
+        lineHeightRatio: 1.25,
+      }),
+    [text]
+  );
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: MESSAGE_BOX.top,
+        left: MESSAGE_BOX.left,
+        width: MESSAGE_BOX.width,
+        height: MESSAGE_BOX.height,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        textAlign: 'center',
+        color: '#7CFFB2',
+        fontFamily: MESSAGE_FONT_FAMILY,
+        fontWeight: 700,
+      }}
+    >
+      {lines.map((line, i) => (
+        <div key={i} style={{ fontSize, lineHeight: 1.25 }}>
+          {line}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // صفحة واحدة = نص الـ spread (يمين أو شمال)
 const Page = ({ side, children }: { side: 'left' | 'right'; children: React.ReactNode }) => (
   <div
@@ -115,6 +232,7 @@ export const PassportPdfTemplate = forwardRef<HTMLDivElement, PassportPdfTemplat
         {/* 4: الغلاف الخلفي = النص الشمال من نفس سبريد الغلاف (من غير عكس/مرآة) */}
         <Page side="left">
           <CoverSpread />
+          {journey.player?.phone && <FittedMessage text={journey.player.phone} />}
         </Page>
       </div>
     </div>
