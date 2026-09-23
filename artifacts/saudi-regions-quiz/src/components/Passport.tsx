@@ -32,6 +32,73 @@ export const regionCoords: Record<string, { top: string, left: string }> = {
   'jouf': { top: '76.51%', left: '83.35%' },
 };
 
+// مكوّن بيقيس النص فعليًا وينزّل حجم الفونت تدريجيًا لحد ما يتظبط جوّه
+// حدود الصندوق (مفيش أي حاجة تطلع بره)، والنص بيتقسم على أكتر من سطر تلقائي.
+function AutoFitText({
+  text,
+  className,
+  maxFontSize = 16,
+  minFontSize = 6,
+}: {
+  text: string;
+  className?: string;
+  maxFontSize?: number;
+  minFontSize?: number;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const [fontSize, setFontSize] = useState(maxFontSize);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const textEl = textRef.current;
+    if (!container || !textEl) return;
+
+    const fit = () => {
+      let size = maxFontSize;
+      textEl.style.fontSize = `${size}px`;
+
+      while (
+        (textEl.scrollHeight > container.clientHeight || textEl.scrollWidth > container.clientWidth) &&
+        size > minFontSize
+      ) {
+        size -= 0.5;
+        textEl.style.fontSize = `${size}px`;
+      }
+      setFontSize(size);
+    };
+
+    fit();
+
+    const resizeObserver = new ResizeObserver(fit);
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, [text, maxFontSize, minFontSize]);
+
+  return (
+    <div
+      ref={containerRef}
+      className={className}
+      style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
+      <p
+        ref={textRef}
+        style={{
+          margin: 0,
+          fontSize: `${fontSize}px`,
+          lineHeight: 1.2,
+          wordBreak: 'break-word',
+          whiteSpace: 'normal',
+          textAlign: 'center',
+          width: '100%',
+        }}
+      >
+        {text}
+      </p>
+    </div>
+  );
+}
+
 export function Passport({ journey, onClose, onResume, onRestart }: PassportProps) {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -144,25 +211,24 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
   );
 
   // نسخة الغلاف الخلفي المستخدمة جوّه أنيميشن القلب (طبقة ساكنة تحت الصفحة اللي بتلف)
-  // نسخة الغلاف الخلفي المستخدمة جوّه أنيميشن القلب (طبقة ساكنة تحت الصفحة اللي بتلف)
   const BackCoverPage = (
     <div className="w-full h-full relative overflow-hidden bg-transparent">
       <div style={{ position: 'absolute', top: 0, left: 0, width: '200%', height: '100%', pointerEvents: 'none' }}>
         <img src="/passport-cover-hq.png" className="w-full h-full object-fill" alt="Back Cover" />
       </div>
 
-      {/* رسالة اليوزر (متخزنة في phone جوه player) */}
+      {/* رسالة اليوزر (متخزنة في phone جوه player) — صندوق ثابت الحجم، النص ميطلعش بره وبيتقسم أسطر ويصغر تلقائي */}
       {journey.player?.phone && (
         <div
-          className="absolute z-30 flex items-center justify-center text-center"
+          className="absolute z-30"
           style={{ top: '86%', left: '10%', width: '80%', height: '11%' }}
         >
-          <p
-            className="font-display text-[#7CFFB2] leading-snug break-words"
-            style={{ fontSize: 'clamp(9px, 2vw, 15px)' }}
-          >
-            {journey.player.phone}
-          </p>
+          <AutoFitText
+            text={journey.player.phone}
+            className="font-display text-[#7CFFB2]"
+            maxFontSize={16}
+            minFontSize={6}
+          />
         </div>
       )}
 
@@ -170,7 +236,7 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <div className="absolute inset-0 pointer-events-none rounded-l-2xl" style={{ background: 'linear-gradient(-135deg, rgba(255,255,255,0.06) 0%, transparent 40%, rgba(0,0,0,0.12) 100%)' }} />
     </div>
   );
-  
+
   return (
     <div className="overlay-in fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <button onClick={onClose} className="absolute top-6 right-6 text-white text-4xl hover:scale-110 transition-transform z-50">
@@ -288,4 +354,4 @@ export function Passport({ journey, onClose, onResume, onRestart }: PassportProp
       <PassportPdfTemplate ref={pdfRef} regions={regions} journey={journey} />
     </div>
   );
-          }
+              }
