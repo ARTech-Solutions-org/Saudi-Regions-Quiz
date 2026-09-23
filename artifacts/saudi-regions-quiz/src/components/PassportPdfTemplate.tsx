@@ -13,10 +13,9 @@ const PAGE_H = 1024; // الـ spread = 1440 × 1024 زي الموقع بالظ�
 const PAGE_BG = '#f3f2ed'; // لون خلفية الـ PDF
 
 // ⚠️ لازم يكون نفس اسم الفونت المستخدم فعليًا في class="font-display" بتاعتك
-// (شوف تعريفه في tailwind.config أو الـ CSS، وحط نفس الاسم هنا بالظبط)
 const MESSAGE_FONT_FAMILY = "'Your Display Font', sans-serif";
 
-// حدود صندوق الرسالة على الغلاف الخلفي (نفس النسب اللي في Passport.tsx: top:86% left:10% width:80% height:11%)
+// حدود صندوق الرسالة على الغلاف الخلفي (نفس النسب: top:86% left:10% width:80% height:11%)
 const MESSAGE_BOX = {
   top: 0.86 * PAGE_H,
   left: 0.10 * PAGE_W,
@@ -24,8 +23,60 @@ const MESSAGE_BOX = {
   height: 0.11 * PAGE_H,
 };
 
-// بيحسب حجم الفونت المناسب وتقسيم النص على أسطر بشكل متزامن (من غير useEffect/ResizeObserver)
-// عشان يشتغل صح مع html2canvas حتى لو الصورة اتاخدت فورًا بعد الـ render.
+// بيقسم النص على أسطر بحيث كل سطر يدخل جوّه عرض الصندوق.
+// لو كلمة كاملة أطول من عرض الصندوق (زي نص من غير أي فراغات) بيكسرها
+// حرف بحرف عشان تفضل جوّه الصندوق برضو.
+function wrapAtSize(
+  text: string,
+  size: number,
+  boxWidth: number,
+  ctx: CanvasRenderingContext2D,
+  fontFamily: string,
+  fontWeight: string
+): string[] {
+  ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = '';
+
+  const fits = (s: string) => ctx.measureText(s).width <= boxWidth;
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (fits(candidate)) {
+      current = candidate;
+      continue;
+    }
+
+    // الكلمة الجديدة خلّت السطر يطلع بره العرض — نقفل السطر الحالي
+    if (current) {
+      lines.push(current);
+      current = '';
+    }
+
+    if (fits(word)) {
+      current = word;
+    } else {
+      // الكلمة نفسها أطول من عرض الصندوق (زي نص من غير فراغات) —
+      // نكسرها حرف بحرف
+      let chunk = '';
+      for (const ch of word) {
+        const trial = chunk + ch;
+        if (fits(trial)) {
+          chunk = trial;
+        } else {
+          if (chunk) lines.push(chunk);
+          chunk = ch;
+        }
+      }
+      current = chunk;
+    }
+  }
+
+  if (current) lines.push(current);
+  return lines;
+}
+
 function wrapAndFitText(
   text: string,
   boxWidth: number,
@@ -42,50 +93,29 @@ function wrapAndFitText(
     fontFamily = 'sans-serif',
     fontWeight = '700',
     maxFontSize = 32,
-    minFontSize = 12,
+    minFontSize = 10,
     lineHeightRatio = 1.25,
   } = opts;
 
-  // حماية لو الكود اتنفذ في بيئة من غير document (SSR مثلاً)
-  if (typeof document === 'undefined') {
-    return { fontSize: minFontSize, lines: [text] };
+  if (typeof document === 'undefined' || !text) {
+    return { fontSize: minFontSize, lines: text ? [text] : [] };
   }
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return { fontSize: minFontSize, lines: [text] };
 
-  const words = text.split(/\s+/).filter(Boolean);
-  if (words.length === 0) return { fontSize: maxFontSize, lines: [] };
-
-  const wrapAtSize = (size: number): string[] => {
-    ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
-    const lines: string[] = [];
-    let current = '';
-
-    for (const word of words) {
-      const trial = current ? `${current} ${word}` : word;
-      if (ctx.measureText(trial).width <= boxWidth || !current) {
-        current = trial;
-      } else {
-        lines.push(current);
-        current = word;
-      }
-    }
-    if (current) lines.push(current);
-    return lines;
-  };
-
-  // بننزل الحجم تدريجيًا لحد ما كل الأسطر تتظبط جوّه ارتفاع الصندوق
+  // بننزل الحجم تدريجيًا لحد ما كل الأسطر (بعد الكسر عند الحاجة) تتظبط
+  // جوّه ارتفاع الصندوق. العرض مضمون دايمًا لأن wrapAtSize بيكسر أي حاجة أطول من العرض.
   for (let size = maxFontSize; size >= minFontSize; size -= 0.5) {
-    const lines = wrapAtSize(size);
+    const lines = wrapAtSize(text, size, boxWidth, ctx, fontFamily, fontWeight);
     const totalHeight = lines.length * size * lineHeightRatio;
     if (totalHeight <= boxHeight) {
       return { fontSize: size, lines };
     }
   }
 
-  return { fontSize: minFontSize, lines: wrapAtSize(minFontSize) };
+  return { fontSize: minFontSize, lines: wrapAtSize(text, minFontSize, boxWidth, ctx, fontFamily, fontWeight) };
 }
 
 function FittedMessage({ text }: { text: string }) {
@@ -95,7 +125,7 @@ function FittedMessage({ text }: { text: string }) {
         fontFamily: MESSAGE_FONT_FAMILY,
         fontWeight: '700',
         maxFontSize: 32,
-        minFontSize: 12,
+        minFontSize: 10,
         lineHeightRatio: 1.25,
       }),
     [text]
@@ -121,7 +151,7 @@ function FittedMessage({ text }: { text: string }) {
       }}
     >
       {lines.map((line, i) => (
-        <div key={i} style={{ fontSize, lineHeight: 1.25 }}>
+        <div key={i} style={{ fontSize, lineHeight: 1.25, maxWidth: '100%', overflow: 'hidden' }}>
           {line}
         </div>
       ))}
