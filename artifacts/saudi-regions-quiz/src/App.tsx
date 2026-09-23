@@ -270,7 +270,13 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
   const [phone, setPhone] = useState(journey.player?.phone ?? '');
   const [touched, setTouched] = useState(false);
   const hasResume = Boolean(journey.player);
+  const MAX_SAUDI_CHARS = 120;
   const valid = name.trim().length > 1 && email.includes('@') && phone.trim().length >= 2;
+
+  const handleSaudiWordChange = (raw: string) => {
+    const cleaned = raw.replace(/[\u0600-\u06FF]/g, '');
+    setPhone(cleaned.slice(0, MAX_SAUDI_CHARS));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -453,17 +459,18 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                   />
                 </div>
 
-                {/* Saudi Word Input */}
+                {/* Saudi Word Input — max 120 characters */}
                 <div>
                   <textarea
                     id="welcome-saudi-word"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/[\u0600-\u06FF]/g, ''))}
+                    onChange={(e) => handleSaudiWordChange(e.target.value)}
                     placeholder="Enter a word for Saudi Arabia"
                     data-testid="input-player-saudi-word"
                     aria-label="Enter a word for Saudi Arabia"
                     autoComplete="off"
                     rows={2}
+                    maxLength={MAX_SAUDI_CHARS}
                     className="font-mod box-border w-full rounded-2xl px-5 py-4 text-[18px] outline-none transition-all duration-200 placeholder:text-black/40 sm:px-6 sm:text-[22px] resize-none"
                     style={{
                       fontWeight: 300,
@@ -482,6 +489,12 @@ function Welcome({ journey, onStart }: { journey: SavedJourney; onStart: (name: 
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
+                  <p
+                    className="font-mod mt-1.5 px-1 text-right text-[12px]"
+                    style={{ color: phone.length >= MAX_SAUDI_CHARS ? '#004C42' : '#767676' }}
+                  >
+                    {phone.length}/{MAX_SAUDI_CHARS}
+                  </p>
                 </div>
 
                 {/* Submit — Figma: Saudi Regular 400, 32.3px, LH 140%, #FFFFFF, center */}
